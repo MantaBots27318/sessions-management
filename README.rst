@@ -120,10 +120,18 @@ Secrets
 
 The token and refresh token value can be gathered the following way :
 
-- In a web browser, enter address : https://accounts.google.com/o/oauth2/auth?redirect_uri=https%3A%2F%2Fmantabots.org&prompt=consent&response_type=code&client_id=<MY CLIENT ID>.apps.googleusercontent.com&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fgmail.send+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcalendar.events+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcalendar+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcontacts.readonly&access_type=offline replacing <MY_CLIENT_ID> by the correct value
+- In a web browser, enter address : 
+.. code-block:: bash
+
+   https://accounts.google.com/o/oauth2/auth?redirect_uri=https%3A%2F%2Fmantabots.org&prompt=consent&response_type=code&client_id=<MY CLIENT ID>.apps.googleusercontent.com&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fgmail.send+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcalendar.events+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcalendar+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcontacts.readonly&access_type=offline replacing <MY_CLIENT_ID> by the correct value
+
 - Select the user owning the calendar and the contact list for authentication
 - Accept everything even what is marked as risky
-- You'll be redirected to https://mantabots.org/?code=<THE CODE I WANT>&scope=https://www.googleapis.com/auth/contacts.readonly%20https://www.googleapis.com/auth/calendar.events%20https://www.googleapis.com/auth/calendar%20https://www.googleapis.com/auth/gmail.send
+- You'll be redirected to 
+
+.. code-block:: bash
+   https://mantabots.org/?code=<THE CODE I WANT>&scope=https://www.googleapis.com/auth/contacts.readonly%20https://www.googleapis.com/auth/calendar.events%20https://www.googleapis.com/auth/calendar%20https://www.googleapis.com/auth/gmail.send
+
 - In the command line, use curl :
 
 .. code-block:: bash
@@ -135,19 +143,21 @@ The token and refresh token value can be gathered the following way :
         -d "grant_type=authorization_code" \
         -d "redirect_uri=https://mantabots.org"
 
-   The result will contain a short term token and a long term token to update the token.json file
+The result will contain a short term token and a long term token to update the token.json file
 
 Usage
 -----
 
 In an environmentin which python, pip and bash has been installed : 
 
-..code:bash :
+.. code-block:: bash
+
    ./scripts/register.sh -k <My_TOKEN_FILE> -c <MY_CONF_FILE> -p <MY_SMTP_PASSWORD_IF_NEEDED> -t <RECIPIENT_ADDRESS> -f <SENDER_ADDRESS>
 
 In an environemnt in which docker is available :
 
-..code:bash :
+.. code-block:: bash
+
    ./scripts/launch.sh -k <My_TOKEN_FILE> -c <MY_CONF_FILE> -p <MY_SMTP_PASSWORD_IF_NEEDED> -t <RECIPIENT_ADDRESS> -f <SENDER_ADDRESS>
 
 ..code:bashrc
