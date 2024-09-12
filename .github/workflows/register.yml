@@ -36,7 +36,7 @@ jobs:
             - name: Launch registration
               env:
                 SMTP_PASSWORD: ${{secrets.SMTP_PASSWORD}}
-                RECIPIENT: ${{variables.RECIPIENT}}
-                SENDER: ${{variables.SENDER}}
+                RECIPIENT: ${{vars.RECIPIENT}}
+                SENDER: ${{vars.SENDER}}
               run: ./register.sh -p ${SMTP_PASSWORD} -t ${RECIPIENT} -f ${SENDER}
 
