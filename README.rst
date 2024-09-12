@@ -102,10 +102,18 @@ The configuration file format is given below :
 Secrets
 -------
 
-2 additional secret information are required :
+SMTP server
+***********
 
-- The smtp server password if not using gmail 
-- The google API token enabling access to Google Calendar API (rw), Google Calendar Events API (rw), Google People API (ro) and Gmail API as a token.json file
+   If not using gmail, you'll need the password of the smtp server your sending address uses to connect 
+
+GCP token
+*********
+
+The google API token enabling access to Google Calendar API (rw), Google Calendar Events API (rw), Google People API (ro) and Gmail API as a token.json file
+
+Format
+######
 
 .. code-block:: JSON
 
@@ -117,6 +125,10 @@ Secrets
       "client_secret": <MY_CLIENT_SECRET>,
       "scopes": ["https://www.googleapis.com/auth/contacts.readonly", "https://www.googleapis.com/auth/calendar.events", "https://www.googleapis.com/auth/gmail.send", "https://www.googleapis.com/auth/calendar"]
    }
+
+
+Content
+#######
 
 The token and refresh token value can be gathered the following way :
 
