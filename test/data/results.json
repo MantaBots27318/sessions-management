@@ -1,0 +1,136 @@
+{
+    "Nominal1" : {
+        "full" : "true",
+        "mails" : [
+            {
+                "from" : "test@test.org",
+                "to" : "moi@moi.com",
+                "subject" : "Notification of TestBots Robotics Team Presence on the Village Campus on {{start_date}} [event1]",
+                "content" : "TestBots between {{start_date}} at 12:00AM and {{end_date}} at 12:00AM adults:\n\nStudents:\n\nThe TestBots coaching team"
+            }
+        ]
+    },
+    "Nominal2" : {
+        "full" : "false",
+        "mails" : [
+            {
+                "from" : "test@test.org",
+                "to" : "moi@moi.com",
+                "subject" : "Notification of TestBots Robotics Team Presence on the Village Campus on {{start_date}} [event1]",
+                "content" : "TestBots between {{start_date}} at 12:00AM and {{end_date}} at 12:00AM adults:\n\nStudents:\n\nThe TestBots coaching team"
+            }
+        ]
+    },
+    "Nominal3" : {
+        "full" : "true",
+        "mails" : [
+            {
+                "from" : "test@test.org",
+                "to" : "moi@moi.com",
+                "subject" : "Notification of TestBots Robotics Team Presence on the Village Campus on {{start_date}} [event1]",
+                "content" : "TestBots between {{start_date}} at 12:00AM and {{end_date}} at 11:59PM adults:\n\nStudents:\n\nThe TestBots coaching team"
+            }
+        ]
+    },
+    "Nominal4" : {
+        "full" : "false",
+        "mails" : [
+            {
+                "from" : "test@test.org",
+                "to" : "moi@moi.com",
+                "subject" : "Notification of TestBots Robotics Team Presence on the Village Campus on {{start_date}} [event1]",
+                "content" : "TestBots between {{start_date}} at {{start_time}} and {{end_date}} at {{end_time}} adults:\n\nStudents:\n\nThe TestBots coaching team"
+            }
+        ]
+    },
+    "Nominal5" : {
+        "full" : "false",
+        "mails" : [
+            {
+                "from" : "test@test.org",
+                "to" : "moi@moi.com",
+                "subject" : "Notification of TestBots Robotics Team Presence on the Village Campus on {{start_date}} [event1]",
+                "content" : "TestBots between {{start_date}} at {{start_time}} and {{end_date}} at {{end_time}} adults:\n- Coach 2\n\nStudents:\n- Student 1\n\nThe TestBots coaching team"
+            }
+        ]
+    },
+    "Nominal6" : {
+        "full" : "false",
+        "mails" : [
+            {
+                "from" : "test@test.org",
+                "to" : "moi@moi.com",
+                "subject" : "Notification of TestBots Robotics Team Presence on the Village Campus on {{start_date}} [event1]",
+                "content" : "TestBots between {{start_date}} at {{start_time}} and {{end_date}} at {{end_time}} adults:\n\nStudents:\n\nThe TestBots coaching team"
+            },
+            {
+                "from" : "test@test.org",
+                "to" : "moi@moi.com",
+                "subject" : "Notification of TestBots Robotics Team Presence on the Village Campus on {{start_date}} [event3]",
+                "content" : "TestBots between {{start_date}} at {{start_time}} and {{end_date}} at {{end_time}} adults:\n\nStudents:\n\nThe TestBots coaching team"
+            },
+            {
+                "from" : "test@test.org",
+                "to" : "moi@moi.com",
+                "subject" : "Notification of TestBots Robotics Team Presence on the Village Campus on {{start_date}} [event5]",
+                "content" : "TestBots between {{start_date}} at {{start_time}} and {{end_date}} at {{end_time}} adults:\n\nStudents:\n\nThe TestBots coaching team"
+            }
+        ]
+    },
+    "Nominal7" : {
+        "full" : "true",
+        "mails" : [
+            {
+                "from" : "test@test.org",
+                "to" : "moi@moi.com",
+                "subject" : "Notification of TestBots Robotics Team Presence on the Village Campus on {{start_date}} [event1]",
+                "content" : "TestBots between {{start_date}} at 12:00AM and {{end_date}} at 12:00AM adults:\n\nStudents:\n\nThe TestBots coaching team"
+            },
+            {
+                "from" : "test@test.org",
+                "to" : "moi@moi.com",
+                "subject" : "Notification of TestBots Robotics Team Presence on the Village Campus on {{start_date}} [event3]",
+                "content" : "TestBots between {{start_date}} at 12:00AM and {{end_date}} at 12:00AM adults:\n\nStudents:\n\nThe TestBots coaching team"
+            },
+            {
+                "from" : "test@test.org",
+                "to" : "moi@moi.com",
+                "subject" : "Notification of TestBots Robotics Team Presence on the Village Campus on {{start_date}} [event5]",
+                "content" : "TestBots between {{start_date}} at 12:00AM and {{end_date}} at 12:00AM adults:\n\nStudents:\n\nThe TestBots coaching team"
+            }
+        ]
+    },
+    "Nominal8" : {
+        "full" : "true",
+        "mails" : [
+        ]
+    },
+    "Nominal9" : {
+        "full" : "true",
+        "mails" : [
+            {
+                "from" : "test@test.org",
+                "to" : "moi@moi.com",
+                "subject" : "Notification of TestBots Robotics Team Presence on the Village Campus on {{start_date}} [event6]",
+                "content" : "TestBots between {{start_date}} at 12:00AM and {{end_date}} at 12:00AM adults:\n\nStudents:\n\nThe TestBots coaching team"
+            },
+            {
+                "from" : "test@test.org",
+                "to" : "moi@moi.com",
+                "subject" : "Notification of TestBots Robotics Team Presence on the Village Campus on {{start_date}} [event3]",
+                "content" : "TestBots between {{start_date}} at 12:00AM and {{end_date}} at 12:00AM adults:\n\nStudents:\n\nThe TestBots coaching team"
+            }
+        ]
+    },
+    "Nominal10" : {
+        "full" : "false",
+        "mails" : [
+            {
+                "from" : "test@test.org",
+                "to" : "moi@moi.com",
+                "subject" : "Notification of TestBots Robotics Team Presence on the Village Campus on {{start_date}} [event1]",
+                "content" : "TestBots between {{start_date}} at {{start_time}} and {{end_date}} at {{end_time}} adults:\n\nStudents:\n\nThe TestBots coaching team"
+            }
+        ]
+    }
+}

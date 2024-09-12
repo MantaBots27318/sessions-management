@@ -1,0 +1,20 @@
+{
+    "team" : "MantaBots",
+    "mail" : {
+        "from" : {
+            "smtp_server" : "smtp.migadu.com",
+            "smtp_port"   : 587,
+            "address"     : "coaches@mantabots.org"
+        },
+        "to" : "nadege.lemperiere@gmail.com",
+        "pattern" : "conf/mail-pattern.txt"
+    },
+    "calendar" : {
+        "id" : "b112c01dea91f1107325232c37852b1bc6985d7217232ce0cb4664a04debaed2@group.calendar.google.com",
+        "topic" : "Team Session",
+        "days" : 1,
+        "full_day" : "True"
+    }
+    
+}
+

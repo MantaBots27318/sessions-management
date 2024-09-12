@@ -1,0 +1,2 @@
+[MESSAGES CONTROL]
+disable=duplicate-code, import-error, broad-exception-caught, wrong-import-position, too-few-public-methods, undefined-variable, multiple-statements, too-many-branches

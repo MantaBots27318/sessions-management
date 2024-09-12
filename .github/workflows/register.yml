@@ -1,0 +1,29 @@
+ -------------------------------------------------------
+# Copyright (c) [2024] FASNY
+# All rights reserved
+# -------------------------------------------------------
+# Automatic kids session management
+# -------------------------------------------------------
+# Nadège LEMPERIERE, @6th september 2024
+# Latest revision: 6th september 2024
+# -------------------------------------------------------
+
+name: Robotics Session Registration
+
+on:
+    schedule:
+        - cron: '0 0 * * *'  # Runs at midnight UTC every day
+    workflow_dispatch:  # Allows manual trigger from GitHub Actions
+
+jobs:
+
+    register:
+        name: Laumching registration process
+        runs-on: ubuntu-latest
+        container:
+          image: docker://python:latest
+          options: --entrypoint /bin/bash
+        needs: check
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@master

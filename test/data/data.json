@@ -1,0 +1,386 @@
+{
+    "1" : {
+        "google" : {
+            "items" : [
+                {
+                    "id": "event1",
+                    "summary": "Next Team Session Saturday",
+                    "full_day" : "true",
+                    "delta_start_hours" : 0,
+                    "delta_end_hours" : 24,
+                    "status": "confirmed",
+                    "attendees": [
+                        {"email": "student@example.com"},
+                        {"email": "coach@example.com"}
+                    ]
+                }
+            ],
+            "connections": [
+                {
+                    "organizations" : [{"title" : "Team Member"}],
+                    "emailAddresses" : [{"value" : "moi@moi.fr"}]
+                }
+            ]
+
+        },
+        "smtp" : {
+        }
+    },
+    "2" : {
+        "google" : {
+            "items" : [
+                {
+                    "id": "event1",
+                    "summary": "Next Team Session Saturday",
+                    "full_day" : "false",
+                    "delta_start_hours" : 0,
+                    "delta_end_hours" : 24,
+                    "status": "confirmed",
+                    "attendees": [
+                        {"email": "student@example.com"},
+                        {"email": "coach@example.com"}
+                    ]
+                }
+            ],
+            "connections": [
+                {
+                    "organizations" : [{"title" : "Team Member"}],
+                    "emailAddresses" : [{"value" : "moi@moi.fr"}]
+                }
+            ]
+        },
+        "smtp" : {
+        }
+    },
+    "3" : {
+        "google" : {
+            "items" : [
+                {
+                    "id": "event1",
+                    "summary": "Next Team Session Saturday",
+                    "full_day" : "false",
+                    "delta_start_hours" : 0,
+                    "delta_end_hours" : 24,
+                    "status": "confirmed",
+                    "attendees": [
+                        {"email": "student1@example.com"},
+                        {"email": "student2@example.com"},
+                        {"email": "student3@example.com"},
+                        {"email": "coach1@example.com"},
+                        {"email": "coach2@example.com"},
+                        {"email": "coach3@example.com"}
+                    ]
+                }
+            ],
+            "connections": [
+                {
+                    "organizations" : [{"title" : "Team Member"}],
+                    "emailAddresses" : [{"value" : "student1@example.com"}],
+                    "names" : [{"displayName" : "Student 1"}] 
+                },
+                {
+                    "organizations" : [{"title" : "Mentor"}],
+                    "emailAddresses" : [{"value" : "student3@example.com"}],
+                    "names" : [{"displayName" : "Student 3"}] 
+                },
+                {
+                    "organizations" : [{"title" : "Mentor"}],
+                    "emailAddresses" : [{"value" : "coach1@example.com"}],
+                    "names" : [{"displayName" : "Coach 1"}] 
+                },
+                {
+                    "organizations" : [{"title" : "Coach"}],
+                    "emailAddresses" : [{"value" : "coach2@example.com"}],
+                    "names" : [{"displayName" : "Coach 2"}] 
+                }
+            ]
+
+        },
+        "smtp" : {
+        }
+    },
+    "4" : {
+        "google" : {
+            "items" : [
+                {
+                    "id": "event1",
+                    "summary": "Next Team Session Saturday",
+                    "full_day" : "false",
+                    "delta_start_hours" : 0,
+                    "delta_end_hours" : 24,
+                    "status": "confirmed",
+                    "attendees": [
+                        {"email": "student@example.com"},
+                        {"email": "coach@example.com"}
+                    ]
+                },
+                {
+                    "id": "event2",
+                    "summary": "Team Session Saturday",
+                    "full_day" : "false",
+                    "delta_start_hours" : 721,
+                    "delta_end_hours" : 745,
+                    "status": "confirmed",
+                    "attendees": [
+                        {"email": "student@example.com"},
+                        {"email": "coach@example.com"}
+                    ]
+                },
+                {
+                    "id": "event3",
+                    "summary": "Team Session Saturday",
+                    "full_day" : "false",
+                    "delta_start_hours" : 24,
+                    "delta_end_hours" : 48,
+                    "status": "confirmed",
+                    "attendees": [
+                        {"email": "student@example.com"},
+                        {"email": "coach@example.com"}
+                    ]
+                },
+                {
+                    "id": "event4",
+                    "summary": "Team Session Saturday",
+                    "full_day" : "false",
+                    "delta_start_hours" : 900,
+                    "delta_end_hours" : 910,
+                    "status": "confirmed",
+                    "attendees": [
+                        {"email": "student@example.com"},
+                        {"email": "coach@example.com"}
+                    ]
+                },
+                {
+                    "id": "event5",
+                    "summary": "Team Session Saturday",
+                    "full_day" : "false",
+                    "delta_start_hours" : 719,
+                    "delta_end_hours" : 743,
+                    "status": "confirmed",
+                    "attendees": [
+                        {"email": "student@example.com"},
+                        {"email": "coach@example.com"}
+                    ]
+                }
+            ],
+            "connections": [
+                {
+                    "organizations" : [{"title" : "Team Member"}],
+                    "emailAddresses" : [{"value" : "moi@moi.fr"}]
+                }
+            ]
+        },
+        "smtp" : {
+        }
+    },
+    "5" : {
+        "google" : {
+            "items" : [
+                {
+                    "id": "event1",
+                    "summary": "Next Team Session Saturday",
+                    "full_day" : "true",
+                    "delta_start_hours" : 0,
+                    "delta_end_hours" : 24,
+                    "status": "confirmed",
+                    "attendees": [
+                        {"email": "student@example.com"},
+                        {"email": "coach@example.com"}
+                    ]
+                },
+                {
+                    "id": "event2",
+                    "summary": "Team Session Saturday",
+                    "full_day" : "true",
+                    "delta_start_hours" : 744,
+                    "delta_end_hours" : 768,
+                    "status": "confirmed",
+                    "attendees": [
+                        {"email": "student@example.com"},
+                        {"email": "coach@example.com"}
+                    ]
+                },
+                {
+                    "id": "event3",
+                    "summary": "Team Session Saturday",
+                    "full_day" : "true",
+                    "delta_start_hours" : 24,
+                    "delta_end_hours" : 48,
+                    "status": "confirmed",
+                    "attendees": [
+                        {"email": "student@example.com"},
+                        {"email": "coach@example.com"}
+                    ]
+                },
+                {
+                    "id": "event4",
+                    "summary": "Team Session Saturday",
+                    "full_day" : "true",
+                    "delta_start_hours" : 900,
+                    "delta_end_hours" : 910,
+                    "status": "confirmed",
+                    "attendees": [
+                        {"email": "student@example.com"},
+                        {"email": "coach@example.com"}
+                    ]
+                },
+                {
+                    "id": "event5",
+                    "summary": "Team Session Saturday",
+                    "full_day" : "true",
+                    "delta_start_hours" : 719,
+                    "delta_end_hours" : 743,
+                    "status": "confirmed",
+                    "attendees": [
+                        {"email": "student@example.com"},
+                        {"email": "coach@example.com"}
+                    ]
+                }
+            ],
+            "connections": [
+                {
+                    "organizations" : [{"title" : "Team Member"}],
+                    "emailAddresses" : [{"value" : "moi@moi.fr"}]
+                }
+            ]
+        },
+        "smtp" : {
+        }
+    },
+    "6" : {
+        "google" : {
+            "items" : [
+                {
+                    "id": "event1",
+                    "summary": "Next Team Session Saturday",
+                    "full_day" : "true",
+                    "delta_start_hours" : 0,
+                    "delta_end_hours" : 24,
+                    "status": "confirmed",
+                    "attendees": [
+                        {"email": "student@example.com"},
+                        {"email": "coach@example.com"}
+                    ]
+                },
+                {
+                    "id": "event2",
+                    "summary": "Team Session Saturday",
+                    "full_day" : "true",
+                    "delta_start_hours" : 744,
+                    "delta_end_hours" : 768,
+                    "status": "confirmed",
+                    "attendees": [
+                        {"email": "student@example.com"},
+                        {"email": "coach@example.com"}
+                    ]
+                },
+                {
+                    "id": "event3",
+                    "summary": "Team Session Saturday",
+                    "full_day" : "true",
+                    "delta_start_hours" : 24,
+                    "delta_end_hours" : 72,
+                    "status": "confirmed",
+                    "attendees": [
+                        {"email": "student@example.com"},
+                        {"email": "coach@example.com"}
+                    ]
+                },
+                {
+                    "id": "event4",
+                    "summary": "Team Session Saturday",
+                    "full_day" : "true",
+                    "delta_start_hours" : 900,
+                    "delta_end_hours" : 910,
+                    "status": "confirmed",
+                    "attendees": [
+                        {"email": "student@example.com"},
+                        {"email": "coach@example.com"}
+                    ]
+                },
+                {
+                    "id": "event5",
+                    "summary": "Team Session Saturday",
+                    "full_day" : "true",
+                    "delta_start_hours" : 719,
+                    "delta_end_hours" : 743,
+                    "status": "confirmed",
+                    "attendees": [
+                        {"email": "student@example.com"},
+                        {"email": "coach@example.com"}
+                    ]
+                },
+                {
+                    "id": "event6",
+                    "summary": "Team Session Saturday",
+                    "full_day" : "true",
+                    "delta_start_hours" : 519,
+                    "delta_end_hours" : 543,
+                    "status": "confirmed",
+                    "attendees": [
+                        {"email": "student@example.com"},
+                        {"email": "coach@example.com"}
+                    ]
+                },
+                {
+                    "id": "event7",
+                    "summary": "Team Session Saturday",
+                    "full_day" : "true",
+                    "delta_start_hours" : 1000,
+                    "delta_end_hours" : 1010,
+                    "status": "confirmed",
+                    "attendees": [
+                        {"email": "student@example.com"},
+                        {"email": "coach@example.com"}
+                    ]
+                }
+            ],
+            "connections": [
+                {
+                    "organizations" : [{"title" : "Team Member"}],
+                    "emailAddresses" : [{"value" : "moi@moi.fr"}]
+                }
+            ]
+        },
+        "smtp" : {
+        }
+    },
+    "7" : {
+        "google" : {
+            "items" : [
+                {
+                    "id": "event1",
+                    "summary": "Next Team Session Saturday",
+                    "full_day" : "false",
+                    "delta_start_hours" : 0,
+                    "delta_end_hours" : 24,
+                    "status": "confirmed",
+                    "attendees": [
+                        {"email": "student@example.com"},
+                        {"email": "coach@example.com"}
+                    ]
+                },
+                {
+                    "id": "event2",
+                    "summary": "Whoops",
+                    "full_day" : "false",
+                    "delta_start_hours" : 0,
+                    "delta_end_hours" : 24,
+                    "status": "confirmed",
+                    "attendees": [
+                        {"email": "student@example.com"},
+                        {"email": "coach@example.com"}
+                    ]
+                }
+            ],
+            "connections": [
+                {
+                    "organizations" : [{"title" : "Team Member"}],
+                    "emailAddresses" : [{"value" : "moi@moi.fr"}]
+                }
+            ]
+        },
+        "smtp" : {
+        }
+    }
+}

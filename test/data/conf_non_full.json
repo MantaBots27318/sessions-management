@@ -1,0 +1,20 @@
+{
+    "team" : "TestBots",
+    "mail" : {
+        "from" : {
+            "smtp_server" : "smtp.test.org",
+            "smtp_port"   : 587,
+            "address"     : "test@test.org"
+        },
+        "to" : "moi@moi.com",
+        "pattern" : "test/data/mail-pattern.txt"
+    },
+    "calendar" : {
+        "id" : "cid",
+        "topic" : "Team Session",
+        "days" : 1,
+        "full_day" : "False"
+    }
+    
+}
+

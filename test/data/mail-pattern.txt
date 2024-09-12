@@ -1,0 +1,6 @@
+Subject: Notification of {{team}} Robotics Team Presence on the Village Campus on {{date}} [{{event_id}}]
+{{team}} between {{start_time}} and {{end_time}} adults:
+{{adults}}
+Students:
+{{students}}
+The {{team}} coaching team
