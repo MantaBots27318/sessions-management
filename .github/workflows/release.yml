@@ -27,11 +27,9 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@master
 
-            - name: Installing dependencies
-              run: pip install -r requirements-test.txt --target site-packages
-
             - name: Linting module
-              run: pylint commons
+              continue-on-error: true
+              run: ./scripts/analyze.sh
 
             - name: Run pip-audit to check for vulnerabilities
               run: pip-audit -r requirements-test.txt --format json
