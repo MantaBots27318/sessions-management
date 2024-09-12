@@ -27,3 +27,9 @@ jobs:
         steps:
             - name: Checkout code
               uses: actions/checkout@master
+
+            - name: Get token
+              env:
+                GCP_TOKEN: ${{secrets.GCP_TOKEN}}
+              shell: bash
+              run: echo "$GCP_TOKEN" >> token.json
