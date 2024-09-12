@@ -8,7 +8,7 @@
 # Latest revision: 6th september 2024
 # -------------------------------------------------------
 
-name: Robotics Session Registration Tool Latest Check
+name: Robotics Session Registration Tool Release Check
 
 on:
     push:
@@ -57,7 +57,7 @@ jobs:
               run: ./scripts/robot.sh -l WARN -d tests
 
             - name: Push test report to Github Pages
-              uses: peaceiris/actions-gh-pages@main
+              uses: peaceiris/actions-gh-pages@v4
               with:
                 publish_dir: ./tests
                 github_token: ${{ secrets.GH_ACCESS_TOKEN }}
