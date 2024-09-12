@@ -165,7 +165,9 @@ class Registration:
                     shall_be_registered_once_again = True
 
                 # Check if event shall be registered
-                if event.get("status") == 'confirmed' and \
+                if 'status' in event and \
+                   event.get("status") == 'confirmed' and \
+                   'summary' in event and \
                    self.__conf['calendar']['topic'] in event.get('summary') and \
                    shall_be_registered_once_again :
                     self.__events.append({'raw' : event, 'dates' : dates})
