@@ -74,7 +74,8 @@ The script uses both a configuration file for non secret value, and command line
 The non secret configuration data are located into a `configuration file`_
 The configuration file format is given below :
 
-..code:json
+.. code-block:: JSON
+
    {
       "team" : <Team name to copy into email>,
       "mail" : { 
@@ -106,7 +107,8 @@ Secrets
 - The smtp server password if not using gmail 
 - The google API token enabling access to Google Calendar API (rw), Google Calendar Events API (rw), Google People API (ro) and Gmail API as a token.json file
 
-..code:json
+.. code-block:: JSON
+
    {
       "token": <authorized oauth user short term token - will be refreshed if no longer valid>,
       "refresh_token": <authorized oauth user long term refresh token>,
@@ -124,7 +126,8 @@ The token and refresh token value can be gathered the following way :
 - You'll be redirected to https://mantabots.org/?code=<THE CODE I WANT>&scope=https://www.googleapis.com/auth/contacts.readonly%20https://www.googleapis.com/auth/calendar.events%20https://www.googleapis.com/auth/calendar%20https://www.googleapis.com/auth/gmail.send
 - In the command line, use curl :
 
-..code:bash
+.. code-block:: bash
+
    curl -X POST https://oauth2.googleapis.com/token -H "Content-Type: application/x-www-form-urlencoded" \
         -d "client_id=<MY_CLIENT_ID>.apps.googleusercontent.com" \
         -d "client_secret=<MY_CLIENT_SECRET>" \
@@ -132,10 +135,7 @@ The token and refresh token value can be gathered the following way :
         -d "grant_type=authorization_code" \
         -d "redirect_uri=https://mantabots.org"
 
-   The result will contain a short term token and a long term token to update the token.json file>
-
-
-
+   The result will contain a short term token and a long term token to update the token.json file
 
 Usage
 -----
