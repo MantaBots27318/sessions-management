@@ -1,4 +1,5 @@
-pylint==3.2.7
-robotframework==7.1
+pylint==3.2.7 
+pip_audit==2.7.3
+robotframework=7.1
 robotframework-requests==0.9.7
 robotframework-mockserver==0.0.7
