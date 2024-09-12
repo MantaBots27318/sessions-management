@@ -1,0 +1,64 @@
+# -------------------------------------------------------
+# Copyright (c) [2024] FASNY
+# All rights reserved
+# -------------------------------------------------------
+# Automatic kids session management
+# -------------------------------------------------------
+# Nadège LEMPERIERE, @6th september 2024
+# Latest revision: 6th september 2024
+# -------------------------------------------------------
+
+name: Robotics Session Registration Tool Latest Check
+
+on:
+    push:
+        tags:
+            - "v[0-9]+.[0-9]+.[0-9]+"
+
+jobs:
+
+    check:
+        name: Analyze Package
+        runs-on: ubuntu-latest
+        container:
+          image: docker://python:latest
+          options: --entrypoint /bin/bash
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@master
+
+            - name: Installing dependencies
+              run: pip install -r requirements-test.txt
+
+            - name: Linting module
+              run: pylint manager.py
+
+            - name: Run pip-audit to check for vulnerabilities
+              run: pip-audit -r requirements-test.txt --format json
+
+    test:
+        name: Testing Package
+        runs-on: ubuntu-latest
+        container:
+          image: docker://python:latest
+          options: --entrypoint /bin/bash
+        needs: [check]
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@master
+
+            - name: Get token
+              env:
+                GCP_TOKEN: ${{secrets.GCP_TOKEN}}
+              shell: bash
+              run: echo "$GCP_TOKEN" >> token.json
+
+            - name: Launching tests
+              run: ./scripts/robot.sh -l WARN -d tests
+
+            - name: Push test report to Github Pages
+              uses: peaceiris/actions-gh-pages@v3
+              with:
+                publish_dir: ./tests
+                github_token: ${{ secrets.GH_ACCESS_TOKEN }}
+                commit_message: "Generate Test report"

@@ -1,0 +1,19 @@
+Subject: Notification of {{team}} Robotics Team Presence on the Village Campus on {{date}}
+
+Dear Sir or Mrs,
+
+I'm writing to inform you that our team, {{team}}, will be visiting the Village Campus between {{start_time}} and {{end_time}} under the supervision of the following responsible adults:
+
+{{adults}}
+
+We greatly appreciate your assistance and cooperation in facilitating this visit. Our team will consist of the following students:
+
+{{students}}
+
+We will ensure that all activities during the visit are conducted in accordance with the premise’s rules and guidelines. If you require any additional information or have any special instructions or requirements, please do not hesitate to let us know.
+
+Thank you in advance for your support and consideration. We look forward to a productive and organized visit.
+
+Yours sincerely,
+
+The {{team}} coaching team
