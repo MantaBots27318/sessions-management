@@ -12,7 +12,7 @@ name: Robotics Session Registration
 
 on:
     schedule:
-        - cron: '0 0 * * *'  # Runs at midnight UTC every day
+        - cron: '0 4 * * *'  # Runs at midnight UTC every day
     workflow_dispatch:  # Allows manual trigger from GitHub Actions
     repository_dispatch: # Allows  trigger from GitHub API
 
