@@ -15,16 +15,21 @@ scriptpath=`dirname $script`
 
 # Parse arguments from flags
 args=""
-while getopts k:c:p:t:f: flag
+while getopts m:i:s:c:p:t:f:r: flag
 do
     case "${flag}" in
-          k) args+=" --google ${OPTARG}";;
+          m) args+=" --tenant-id ${OPTARG}";;
+          i) args+=" --client-id ${OPTARG}";;
+          s) args+=" --client-secret ${OPTARG}";;
           c) args+=" --conf \"${OPTARG}\"";;
           p) args+=" --smtp ${OPTARG}";;
           t) args+=" --receiver ${OPTARG}";;
           f) args+=" --sender ${OPTARG}";;
+          r) args+=" --refresh-token ${OPTARG}";;
     esac
 done
+
+echo ${OPTARG}
 
 
 # Create virtual environment

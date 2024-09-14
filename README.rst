@@ -135,26 +135,27 @@ The token and refresh token value can be gathered the following way :
 - In a web browser, enter address : 
 .. code-block:: bash
 
-   https://accounts.google.com/o/oauth2/auth?redirect_uri=https%3A%2F%2Fmantabots.org&prompt=consent&response_type=code&client_id=<MY CLIENT ID>.apps.googleusercontent.com&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fgmail.send+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcalendar.events+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcalendar+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fcontacts.readonly&access_type=offline replacing <MY_CLIENT_ID> by the correct value
-
+   https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=<MY CLIENT ID>&response_type=code&redirect_uri=https://mantabots.org&response_mode=query&scope=offline_access%20Contacts.Read%20Calendars.ReadWrite%20Mail.Send%20User.Read
+   
 - Select the user owning the calendar and the contact list for authentication
-- Accept everything even what is marked as risky
 - You'll be redirected to 
 
 .. code-block:: bash
-   https://mantabots.org/?code=<THE CODE I WANT>&scope=https://www.googleapis.com/auth/contacts.readonly%20https://www.googleapis.com/auth/calendar.events%20https://www.googleapis.com/auth/calendar%20https://www.googleapis.com/auth/gmail.send
+   https://mantabots.org/?code=<AUTHORIZATION CODE>
 
 - In the command line, use curl :
 
 .. code-block:: bash
 
-   curl -X POST https://oauth2.googleapis.com/token -H "Content-Type: application/x-www-form-urlencoded" \
-        -d "client_id=<MY_CLIENT_ID>.apps.googleusercontent.com" \
-        -d "client_secret=<MY_CLIENT_SECRET>" \
-        -d "code=<THE CODE I WANT>" \
-        -d "grant_type=authorization_code" \
-        -d "redirect_uri=https://mantabots.org"
-
+   curl -X POST https://login.microsoftonline.com/common/oauth2/v2.0/token \
+     -H "Content-Type: application/x-www-form-urlencoded" \
+     -d "client_id=<MY_CLIENT_ID>" \
+     -d "scope=offline_access Contacts.Read Calendars.ReadWrite Mail.Send User.Read" \
+     -d "code=<AUTHORIZATION CODE>" \
+     -d "redirect_uri=https://mantabots.org" \
+     -d "grant_type=authorization_code" \
+     -d "client_secret=<MY_CLIENT_SECRET>"
+     
 The result will contain a short term token and a long term token to update the token.json file
 
 Usage

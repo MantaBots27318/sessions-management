@@ -1,5 +1,4 @@
 click==8.1.7
-google-api-python-client==2.144.0
-google-auth==2.34.0
-google-auth-oauthlib==1.2.1
-google-auth-httplib2==0.2.0
+msal==1.31.0
+azure-identity==1.17.1
+msgraph-sdk==1.7.0
