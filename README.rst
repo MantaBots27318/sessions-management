@@ -64,7 +64,6 @@ Prerequisites
 
 
 - An app shall have been declared in Microsoft Entra ID, with the following authentication settings :
-
    * Redirect URI shall be set to https://mantabots.org
    * Implicit grant shall be set to Access tokens and ID tokens
    * Access tokens shall be set to Read and write calendars in all mailboxes, Read user contacts, Send mail as a user, Read user profile
