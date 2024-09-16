@@ -62,6 +62,7 @@ Prerequisites
 
 - An Azure subscription shall have been created for the personal account owning the contact list
 - An app shall have been declared in Microsoft Entra ID, with the following authentication settings :
+
 .. image:: doc/azure-app-auth.png
 
    * Supported account types shall be set to **Accounts in any organizational directory and personal Microsoft accounts**
@@ -70,6 +71,7 @@ Prerequisites
 
 
 - The app shall be granted the following API permissions :
+
 .. image:: doc/azure-app.png
 
    * offline_access enables to maintain the acquired authorization the app has for the Microsoft personal account
@@ -79,6 +81,7 @@ Prerequisites
    * Mail.Send enables to send email
 
 - A secret shall have been created for this user :
+
 .. image:: doc/azure-app-secret.png
 
 Configuration
