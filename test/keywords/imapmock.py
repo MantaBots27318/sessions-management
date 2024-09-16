@@ -2,35 +2,29 @@
 # Copyright (c) [2024] FASNY
 # All rights reserved
 # -------------------------------------------------------
-""" SMTP server mock for testing """
+""" IMAP server mock for testing """
 # -------------------------------------------------------
-# Nadège LEMPERIERE, @11th September 2024
-# Latest revision: 11th September 2024
+# Nadège LEMPERIERE, @15th September 2024
+# Latest revision: 15th September 2024
 # -------------------------------------------------------
 
 # System includes
-from email          import message_from_string
+from email          import message_from_string, message_from_bytes
 from email.policy   import default
 
-class MockSMTPServer:
-    """ A mock class to simulate an SMTP server """
+class MockImapServer:
+    """ A mock class to simulate an IMAP server """
 
     def __init__(self, scenario):
         self.__scenario = {}
         self.__emails = []
 
-    def ehlo(self):
-        pass
-
-    def starttls(self):
-        pass
-
     def login(self, address, password):
         pass
 
-    def sendmail(self, from_addr, to_addr, message):
+    def append(self, box, flags, date_time, message):
 
-        msg = message_from_string(message, policy=default)
+        msg = message_from_bytes(message, policy=default)
 
         subject = msg['Subject']
 
@@ -50,13 +44,14 @@ class MockSMTPServer:
             content = msg.get_payload(decode=True).decode(msg.get_content_charset())
 
         self.__emails.append({
-            'from'      : from_addr,
-            'to'        : to_addr,
+            'box'       : box,
+            'flags'     : flags,
+            'time'      : date_time,
             'subject'   : subject,
             'content'   : content
         })
 
-    def quit(self):
+    def logout(self):
         pass
 
     def get_mails(self) :

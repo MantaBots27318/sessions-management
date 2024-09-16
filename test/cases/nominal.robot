@@ -57,7 +57,7 @@ Library          ../keywords/workflow.py
     ${scenario}      Build Scenario Data    Nominal8
     Check Final State        ${scenario}    ${result}
 
-4.2 Ensure Updated Or New Events Are Sent 
+4.2 Ensure Updated Or New Events Are Sent
     ${scenario}      Build Scenario Data    Nominal7
     ${result}        Run Registration Workflow with Mocks    ${scenario}    moi@moi.com    test@test.org
     Check Final State        ${scenario}    ${result}
@@ -66,6 +66,7 @@ Library          ../keywords/workflow.py
     ${scenario}      Merge Scenario Data                 ${scenario}    ${scenario2}
     ${result}        Run Registration Workflow with Mocks    ${scenario}    moi@moi.com    test@test.org
     Check Final State        ${scenario}    ${result}
+    ${scenario}      Update Scenario Data From Results   ${scenario}    ${result}
     ${result}        Run Registration Workflow with Mocks    ${scenario}    moi@moi.com    test@test.org
     ${scenario}      Build Scenario Data    Nominal8
     Check Final State        ${scenario}    ${result}

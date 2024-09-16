@@ -1,6 +1,16 @@
 {
     "1" : {
         "google" : {
+            "calendars" : [
+                {
+                    "id": "calendar1",
+                    "name": "2024-2025 IntoTheDeep Team Calendar"
+                },
+                {
+                    "id": "calendar2",
+                    "name": "Test Calendar"
+                }
+            ],
             "items" : [
                 {
                     "id": "event1",
@@ -24,10 +34,22 @@
 
         },
         "smtp" : {
+        },
+        "imap" : {
         }
     },
     "2" : {
         "google" : {
+            "calendars" : [
+                {
+                    "id": "calendar1",
+                    "name": "2024-2025 IntoTheDeep Team Calendar"
+                },
+                {
+                    "id": "calendar2",
+                    "name": "Test Calendar"
+                }
+            ],
             "items" : [
                 {
                     "id": "event1",
@@ -50,10 +72,22 @@
             ]
         },
         "smtp" : {
+        },
+        "imap" : {
         }
     },
     "3" : {
         "google" : {
+            "calendars" :[
+                {
+                    "id": "calendar1",
+                    "name": "2024-2025 IntoTheDeep Team Calendar"
+                },
+                {
+                    "id": "calendar2",
+                    "name": "Test Calendar"
+                }
+            ],
             "items" : [
                 {
                     "id": "event1",
@@ -76,31 +110,43 @@
                 {
                     "organizations" : [{"title" : "Team Member"}],
                     "emailAddresses" : [{"value" : "student1@example.com"}],
-                    "names" : [{"displayName" : "Student 1"}] 
+                    "names" : [{"displayName" : "Student 1"}]
                 },
                 {
                     "organizations" : [{"title" : "Mentor"}],
                     "emailAddresses" : [{"value" : "student3@example.com"}],
-                    "names" : [{"displayName" : "Student 3"}] 
+                    "names" : [{"displayName" : "Student 3"}]
                 },
                 {
                     "organizations" : [{"title" : "Mentor"}],
                     "emailAddresses" : [{"value" : "coach1@example.com"}],
-                    "names" : [{"displayName" : "Coach 1"}] 
+                    "names" : [{"displayName" : "Coach 1"}]
                 },
                 {
                     "organizations" : [{"title" : "Coach"}],
                     "emailAddresses" : [{"value" : "coach2@example.com"}],
-                    "names" : [{"displayName" : "Coach 2"}] 
+                    "names" : [{"displayName" : "Coach 2"}]
                 }
             ]
 
         },
         "smtp" : {
+        },
+        "imap" : {
         }
     },
     "4" : {
         "google" : {
+            "calendars" :[
+                {
+                    "id": "calendar1",
+                    "name": "2024-2025 IntoTheDeep Team Calendar"
+                },
+                {
+                    "id": "calendar2",
+                    "name": "Test Calendar"
+                }
+            ],
             "items" : [
                 {
                     "id": "event1",
@@ -171,10 +217,22 @@
             ]
         },
         "smtp" : {
+        },
+        "imap" : {
         }
     },
     "5" : {
         "google" : {
+            "calendars" :[
+                {
+                    "id": "calendar1",
+                    "name": "2024-2025 IntoTheDeep Team Calendar"
+                },
+                {
+                    "id": "calendar2",
+                    "name": "Test Calendar"
+                }
+            ],
             "items" : [
                 {
                     "id": "event1",
@@ -245,10 +303,22 @@
             ]
         },
         "smtp" : {
+        },
+        "imap" : {
         }
     },
     "6" : {
         "google" : {
+            "calendars" :[
+                {
+                    "id": "calendar1",
+                    "name": "2024-2025 IntoTheDeep Team Calendar"
+                },
+                {
+                    "id": "calendar2",
+                    "name": "Test Calendar"
+                }
+            ],
             "items" : [
                 {
                     "id": "event1",
@@ -343,10 +413,22 @@
             ]
         },
         "smtp" : {
+        },
+        "imap" : {
         }
     },
     "7" : {
         "google" : {
+            "calendars" :[
+                {
+                    "id": "calendar1",
+                    "name": "2024-2025 IntoTheDeep Team Calendar"
+                },
+                {
+                    "id": "calendar2",
+                    "name": "Test Calendar"
+                }
+            ],
             "items" : [
                 {
                     "id": "event1",
@@ -381,6 +463,8 @@
             ]
         },
         "smtp" : {
+        },
+        "imap" : {
         }
     }
 }

@@ -6,7 +6,7 @@
                 "from" : "test@test.org",
                 "to" : "moi@moi.com",
                 "subject" : "Notification of TestBots Robotics Team Presence on the Village Campus on {{start_date}} [event1]",
-                "content" : "TestBots between {{start_date}} at 12:00AM and {{end_date}} at 12:00AM adults:\n\nStudents:\n\nThe TestBots coaching team"
+                "content" : "TestBots between {{start_date}} at 12:00AM and {{end_date}} at 11:59PM adults:\n\nStudents:\n\nThe TestBots coaching team"
             }
         ]
     },
@@ -17,7 +17,7 @@
                 "from" : "test@test.org",
                 "to" : "moi@moi.com",
                 "subject" : "Notification of TestBots Robotics Team Presence on the Village Campus on {{start_date}} [event1]",
-                "content" : "TestBots between {{start_date}} at 12:00AM and {{end_date}} at 12:00AM adults:\n\nStudents:\n\nThe TestBots coaching team"
+                "content" : "TestBots between {{start_date}} at 12:00AM and {{end_date}} at 11:59PM adults:\n\nStudents:\n\nThe TestBots coaching team"
             }
         ]
     },
@@ -50,7 +50,7 @@
                 "from" : "test@test.org",
                 "to" : "moi@moi.com",
                 "subject" : "Notification of TestBots Robotics Team Presence on the Village Campus on {{start_date}} [event1]",
-                "content" : "TestBots between {{start_date}} at {{start_time}} and {{end_date}} at {{end_time}} adults:\n- Coach 2\n\nStudents:\n- Student 1\n\nThe TestBots coaching team"
+                "content" : "TestBots between {{start_date}} at {{start_time}} and {{end_date}} at {{end_time}} adults:\n- Coach 2\nStudents:\n- Student 1\nThe TestBots coaching team"
             }
         ]
     },
@@ -84,19 +84,19 @@
                 "from" : "test@test.org",
                 "to" : "moi@moi.com",
                 "subject" : "Notification of TestBots Robotics Team Presence on the Village Campus on {{start_date}} [event1]",
-                "content" : "TestBots between {{start_date}} at 12:00AM and {{end_date}} at 12:00AM adults:\n\nStudents:\n\nThe TestBots coaching team"
+                "content" : "TestBots between {{start_date}} at 12:00AM and {{end_date}} at 11:59PM adults:\n\nStudents:\n\nThe TestBots coaching team"
             },
             {
                 "from" : "test@test.org",
                 "to" : "moi@moi.com",
                 "subject" : "Notification of TestBots Robotics Team Presence on the Village Campus on {{start_date}} [event3]",
-                "content" : "TestBots between {{start_date}} at 12:00AM and {{end_date}} at 12:00AM adults:\n\nStudents:\n\nThe TestBots coaching team"
+                "content" : "TestBots between {{start_date}} at 12:00AM and {{end_date}} at 11:59PM adults:\n\nStudents:\n\nThe TestBots coaching team"
             },
             {
                 "from" : "test@test.org",
                 "to" : "moi@moi.com",
                 "subject" : "Notification of TestBots Robotics Team Presence on the Village Campus on {{start_date}} [event5]",
-                "content" : "TestBots between {{start_date}} at 12:00AM and {{end_date}} at 12:00AM adults:\n\nStudents:\n\nThe TestBots coaching team"
+                "content" : "TestBots between {{start_date}} at 12:00AM and {{end_date}} at 11:59PM adults:\n\nStudents:\n\nThe TestBots coaching team"
             }
         ]
     },
@@ -112,13 +112,13 @@
                 "from" : "test@test.org",
                 "to" : "moi@moi.com",
                 "subject" : "Notification of TestBots Robotics Team Presence on the Village Campus on {{start_date}} [event6]",
-                "content" : "TestBots between {{start_date}} at 12:00AM and {{end_date}} at 12:00AM adults:\n\nStudents:\n\nThe TestBots coaching team"
+                "content" : "TestBots between {{start_date}} at 12:00AM and {{end_date}} at 11:59PM adults:\n\nStudents:\n\nThe TestBots coaching team"
             },
             {
                 "from" : "test@test.org",
                 "to" : "moi@moi.com",
                 "subject" : "Notification of TestBots Robotics Team Presence on the Village Campus on {{start_date}} [event3]",
-                "content" : "TestBots between {{start_date}} at 12:00AM and {{end_date}} at 12:00AM adults:\n\nStudents:\n\nThe TestBots coaching team"
+                "content" : "TestBots between {{start_date}} at 12:00AM and {{end_date}} at 11:59PM adults:\n\nStudents:\n\nThe TestBots coaching team"
             }
         ]
     },

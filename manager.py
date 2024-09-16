@@ -9,72 +9,106 @@
 # -------------------------------------------------------
 
 # System includes
-from logging    import config, getLogger
-from datetime   import datetime, timedelta, timezone
-from os         import path
-from base64     import urlsafe_b64encode
-from json       import load
-from smtplib    import SMTP
+from logging import config, getLogger
+from datetime import datetime, timedelta, timezone
+from os import path
+from json import load, loads
+from time import time
+from smtplib import SMTP
+from imaplib import IMAP4_SSL, Time2Internaldate
+from zoneinfo import ZoneInfo
 
 # Email includes
-from email.mime.text        import MIMEText
-from email.mime.multipart   import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 # Click includes
 from click import option, group
 
-# Google includes
-from google.auth.transport.requests import Request
-from google.oauth2.credentials      import Credentials
-from googleapiclient.discovery      import build
+# Requests includes
+from requests import get, post
+
 
 # Logger configuration settings
 logg_conf_path = path.normpath(path.join(path.dirname(__file__), 'conf/logging.conf'))
 
-#pylint: disable=R0902, E1101
+#pylint: disable=W0719, R0902
 class Registration:
     """ Class managing registration workflow """
 
-    # Define scopes for the Google APIs
+    # Define scopes for Microsoft Graph API
     s_scopes = [
-        'https://www.googleapis.com/auth/calendar',
-        'https://www.googleapis.com/auth/calendar.events',
-        'https://www.googleapis.com/auth/contacts.readonly',
-        'https://www.googleapis.com/auth/gmail.send' 
+        'Contacts.Read',
+        'Calendars.ReadWrite',
+        'Mail.Send'
     ]
 
-    def __init__(self, google, smtp, google_service=None, smtp_server=None):
-        """ Constructor """
+#pylint: disable=R0913, C0301
+    def __init__(self, microsoft, mail, getfunc=get, postfunc=post, smtp_server=None, imap_server=None):
+        """
+        Constructor
+        Parameters :
+            microsoft (str) : Path to the Microsoft Graph API token configuration file
+            mail (str)      : Password for the smtp and imap server
+            get (function)  : Function to perform GET requests (can be mocked for testing)
+            post (function) : Function to perform POST requests (can be mocked for testing)
+            smtp_server (str): SMTP object to use for sending emails (can be mocked for testing)
+            imap_server (str): IMAP object to use for sending emails (can be mocked for testing)
+        Returns    :
+        Throws     :
+        """
+#pylint: enable=C0301
 
         # Initialize logger
         self.__logger = getLogger('registration')
         self.__logger.info('INITIALIZING REGISTRATION')
 
-        # Initialize credentials
-        self.__credentials_file       = path.normpath(path.join(path.dirname(__file__), google))
-        self.__credentials            = None
-        self.__smtp_password          = smtp
-        self.__conf                   = {}
-
-        # Mocked services (Injected for testing)
-        self.__google = google_service
+        # Mock external API if required
         self.__smtp = smtp_server
+        self.__imap = imap_server
+        self.__get  = getfunc
+        self.__post = postfunc
+
+        # Initialize credentials
+        self.__credentials = {}
+        token_conf_path = path.normpath(path.join(path.dirname(__file__), microsoft))
+        with open(token_conf_path, encoding="utf-8") as file: self.__credentials = load(file)
+        self.__mail_password = mail
+        self.__conf = {}
+
+        # Authenticate user
+        try :
+            self.__token = self.__get_token()
+            self.__user = self.__get_user(self.__token)
+        except Exception as e :
+            self.__logger.error('Failed to retrieve authorized user with error %s',str(e))
 
         # Gather contacts list
-        self.__contacts = self.__initialize_contacts()
+        try :
+            self.__contacts = self.__initialize_contacts(self.__token)
+        except Exception as e :
+            self.__logger.error('Failed to retrieve contacts with error %s',str(e))
 
-        # Initialize mail data
-        self.__events    = []
+        # Initialize application data
+        self.__events = []
 
         self.__logger.info('---> Registration initialized')
+#pylint: enable=R0913
 
-    def configure(self, conf, receiver, sender) :
-        """ Read configuration from file """
+    def configure(self, conf, receiver, sender):
+        """
+        Configure the registration workflow from a configuration file and command line parameters
+        Parameters :
+            conf (str) : Path to the configuration file
+            receiver (str)  : Mail recipient address (can be overridden by command line)
+            sender (str)  : Mail recipient address (can be overridden by command line)
+        Returns    :
+        Throws     :
+        """
 
         # Load configuration file
         app_conf_path = path.normpath(path.join(path.dirname(__file__), conf))
-        with open(app_conf_path, encoding="utf-8") as file:
-            self.__conf = load(file)
+        with open(app_conf_path, encoding="utf-8") as file: self.__conf = load(file)
 
         # Check configuration content and add default values if needed
         if 'team' not in self.__conf :
@@ -83,424 +117,607 @@ class Registration:
         if 'mail' not in self.__conf :
             self.__conf['mail'] = {}
 
-#pylint: disable=W0719
         if 'from' not in self.__conf['mail'] :
             # Use gmail address through google api
-            self.__conf['mail']['from'] = { "address" : "mantabots.infra@gmail.com"}
+            self.__conf['mail']['from'] = { "address" : "mantabots.infra@outlook.com"}
         if 'address' not in self.__conf['mail']['from'] :
-            self.__conf['mail']['from'] = { "address" : "mantabots.infra@gmail.com"}
-        if self.__conf['mail']['from']['address'] != "mantabots.infra@gmail.com" :
-            # We need the smtp server configuration
-            if len(self.__smtp_password) == 0 :
+            self.__conf['mail']['from'] = { "address" : "mantabots.infra@outlook.com"}
+        # Update configuration from command line parameters
+        if len(sender) > 0 : self.__conf['mail']['from']['address'] = sender
+        if self.__conf['mail']['from']['address'] != "mantabots.infra@outlook.com" :
+
+
+            # We need the smtp and imap server configuration
+            if len(self.__mail_password) == 0 :
                 raise Exception('Missing password for external address')
-            self.__conf['mail']['from']['password'] = self.__smtp_password
+            self.__conf['mail']['from']['password'] = self.__mail_password
+
             if 'smtp_server' not in self.__conf['mail']['from'] :
                 raise Exception('Missing smtp server for external address')
-            if 'smtp_port' not in self.__conf['mail']['from'] :
+            if 'port' not in self.__conf['mail']['from']['smtp_server'] :
                 raise Exception('Missing smtp port for external address')
+            if 'host' not in self.__conf['mail']['from']['smtp_server'] :
+                raise Exception('Missing smtp host for external address')
+
+            if 'imap_server' not in self.__conf['mail']['from'] :
+                raise Exception('Missing smtp server for external address')
+            if 'port' not in self.__conf['mail']['from']['imap_server'] :
+                raise Exception('Missing smtp port for external address')
+            if 'host' not in self.__conf['mail']['from']['imap_server'] :
+                raise Exception('Missing smtp host for external address')
 
         if 'to' not in self.__conf['mail'] :
             self.__conf['mail']['to'] = 'nadege.lemperiere@gmail.com'
+
+        # Update configuration from command line parameters
+        if len(receiver) > 0 : self.__conf['mail']['to'] = receiver
 
         if 'pattern' not in self.__conf['mail'] :
             self.__conf['mail']['pattern'] = 'mail_pattern.txt'
 
         if 'calendar' not in self.__conf :
             self.__conf['calendar'] = {}
-        if 'id' not in self.__conf['calendar'] :
-            raise Exception('Missing calendar id to look for team session')
+        if 'name' not in self.__conf['calendar'] :
+            raise Exception('Missing calendar name to look for team session')
         if 'topic' not in self.__conf['calendar'] :
             self.__conf['calendar']['topic'] = 'Team Session'
         if 'days' not in self.__conf['calendar'] :
             self.__conf['calendar']['days'] = 1
+        if 'time_zone' not in self.__conf['calendar'] :
+            self.__conf['calendar']['time_zone'] = 'America/New_York'
         if 'full_day' not in self.__conf['calendar'] :
             self.__conf['calendar']['full_day'] = True
         else :
             self.__conf['calendar']['full_day'] = self.__conf['calendar']['full_day'] != 'False'
 
-        if len(receiver) > 0 : self.__conf['mail']['to'] = receiver
-        if len(sender) > 0 : self.__conf['mail']['from']['address'] = sender
-
-#pylint: enable=W0719
-
     def search_events(self):
-        """ Get all calendar events in the coming days """
+        """
+        Search and select events to be registered
+        Parameters :
+        Returns    :
+        Throws     :
+        """
 
         self.__events = []
         self.__logger.info('SEARCHING FOR UPCOMING EVENTS')
 
         try:
-            # Get calendar details
-            service = self.__initialize_service('calendar', 'v3')
-            calendar = service.calendars().get(calendarId=self.__conf['calendar']['id']).execute()
-            self.__logger.info(
-                "---> Analyzing calendar %s containing %s",
-                calendar['summary'],calendar.get('description', 'No description'))
 
-            # List upcoming events
-            now = datetime.now(timezone.utc).isoformat()
-            end = (datetime.now(timezone.utc) + \
-                  timedelta(days=self.__conf['calendar']['days'])).isoformat()
-            events_result = service.events().list(calendarId=self.__conf['calendar']['id'],
-                timeMin=now, timeMax=end, singleEvents=True, orderBy='startTime').execute()
-            events = events_result.get('items', [])
+            calendar = self.__get_calendar_id(self.__conf['calendar']['name'], self.__token)
+            events = self.__get_events(calendar, self.__conf['calendar']['days'], self.__token)
 
-            # Look for confirmed events in the timeframe
-            for event in events:
+            for event in events :
 
-                dates = self.__compute_timeslot(event, self.__conf['calendar']['full_day'])
+                # Retrieve the dates for which event has already been registered
+                last_dates = self.__get_registration_status(event['id'],self.__token)
 
-                # Check if the event has already been registered, and if it needs to be updated
-                last_dates = self.__read_last_dates(event)
+                # Compute the timeslot for which the event shall be registered
+                dates = self.__compute_registration_timeslot(
+                    event,
+                    self.__conf['calendar']['full_day'])
 
-                shall_be_registered_once_again = False
+                # Compute the difference between the current registration state, and the new ones
                 delta_start = timedelta(days=1)
                 delta_end = timedelta(days=1)
-                if 'start' in last_dates :
-                    delta_start = last_dates['start'] - dates['start']
-                if 'end' in last_dates :
-                    delta_end = dates['end'] - last_dates['end']
+                if 'start' in last_dates : delta_start = last_dates['start'] - dates['start']
+                if 'end' in last_dates : delta_end = dates['end'] - last_dates['end']
 
+                # If they differ, even if the event was already register, we register it again
+                shall_be_registered_once_again = False
                 if delta_start.total_seconds() > 0 or delta_end.total_seconds() > 0 :
                     shall_be_registered_once_again = True
 
-                # Check if event shall be registered
-                if 'status' in event and \
-                   event.get("status") == 'confirmed' and \
-                   'summary' in event and \
-                   self.__conf['calendar']['topic'] in event.get('summary') and \
-                   shall_be_registered_once_again :
+                # Check if event shall be registered, using its status,
+                # its subject, and its registration status
+                topic = self.__conf['calendar']['topic']
+                if  'isCancelled' in event and not event['isCancelled'] and \
+                    'subject' in event and topic in event['subject'] and \
+                    shall_be_registered_once_again :
                     self.__events.append({'raw' : event, 'dates' : dates})
 
-            self.__logger.info(
-                "---> Found %d events with topic %s in the next %d days",
-                len(self.__events), self.__conf['calendar']['topic'],
-                self.__conf['calendar']['days'])
-
         except Exception as e:
-            self.__logger.error("Error retrieving calendar: %s",str(e))
+            self.__logger.error("Error retrieving calendar: %s", str(e))
+
+        self.__logger.info("---> Found %d events",len(self.__events))
 
 #pylint: disable=R1702
     def get_attendees(self):
-
-        """ List attendees for selected event """
+        """
+        Update event attendees information from contacts information
+        Parameters :
+        Returns    :
+        Throws     :
+        """
         self.__logger.info('GETTING ATTENDEES INFO FROM CONTACTS')
 
-        for i_event,event in enumerate(self.__events) :
+        for i_event, event in enumerate(self.__events):
 
-            attendees = {
-                'students' : [],
-                'coaches'  : [],
-                'mentors'  : []
-            }
-
+            # Get event attendees
+            attendees = {'students': [], 'coaches': [], 'mentors': []}
             if 'attendees' in event['raw']:
                 for attendee in event['raw']['attendees']:
-                    for contact in self.__contacts :
+                    # Search for attendees in contacts by matching email address
+                    for contact in self.__contacts:
+                        if 'emailAddresses' in contact:
+                            for mail in contact['emailAddresses']:
+                                if mail['address'] == attendee['emailAddress']['address']:
 
-                        # Get title
-                        title = ''
-                        if 'organizations' in contact :
-                            for organization in contact['organizations'] :
-                                title = organization['title']
-
-                        # Check if email address match attendee one
-                        if 'emailAddresses' in contact :
-                            for mail in contact['emailAddresses'] :
-                                if 'value' in mail :
-                                    if mail['value'] == attendee['email'] :
-                                        if title == 'Team Member' :
-                                            attendees['students'].append(contact)
-                                        elif title == 'Coach' :
-                                            attendees['coaches'].append(contact)
-                                        elif title == 'Mentor' :
-                                            attendees['mentors'].append(contact)
+                                    # Append to list from job title
+                                    title = contact['jobTitle']
+                                    if title == 'Team Member':
+                                        attendees['students'].append(contact)
+                                    elif title == 'Coach':
+                                        attendees['coaches'].append(contact)
+                                    elif title == 'Mentor':
+                                        attendees['mentors'].append(contact)
 
                 self.__logger.info(
                     "---> Found %d coaches %d students and %d mentors for event %s",
                     len(attendees['coaches']),
                     len(attendees['students']),
                     len(attendees['mentors']),
-                    self.__events[i_event]['raw'].get('summary')
+                    event['raw'].get('subject', 'No Subject')
                 )
 
             self.__events[i_event]['attendees'] = attendees
+#pylint: enable=R1702
 
-#pylint: disable=R1702
-
-#pylint: disable=R0914
-    def prepare_emails(self) :
-        """ Build email content by replacing the tags by the current value"""
+    def prepare_emails(self):
+        """
+        Build email content by replacing the pattern tags by the correct value
+        Parameters :
+        Returns    :
+        Throws     :
+        """
 
         self.__logger.info('FORMATTING EMAIL FROM TEMPLATE')
 
         # Read mail template file
-        pattern_path = path.normpath(
-            path.join(path.dirname(__file__), self.__conf['mail']['pattern']))
-        with open(pattern_path, encoding="utf-8") as file:
-            template = file.read()
+        pattern_path = \
+            path.normpath(path.join(path.dirname(__file__), self.__conf['mail']['pattern']))
+        with open(pattern_path, encoding="utf-8") as file: template = file.read()
 
-        self.__logger.info(
-            "---> Template read from file %s containing %d characters",
-            self.__conf['mail']['pattern'], len(template)
-        )
+        # Format each event's email content
+        for i_event, event in enumerate(self.__events):
 
-        # Gather data
-        for i_event,event in enumerate(self.__events) :
+            # Sent email with date corresponding to the configured timezone
+            tz = ZoneInfo(self.__conf['calendar']['time_zone'])
+            start = event['dates']['start'].astimezone(tz)
+            end = event['dates']['end'].astimezone(tz)
+            data = {
+                'team': self.__conf['team'],
+                'event_id': event['raw']['id'],
+                'start_time': start.strftime('%A, %d. %B %Y at %I:%M%p'),
+                'end_time': end.strftime('%A, %d. %B %Y at %I:%M%p'),
+                'date': event['dates']['start'].strftime('%A, %d. %B %Y')
+            }
 
-            data = {}
+            data['adults'] = \
+                '\n'.join(f"- {c['displayName']}" for c in event['attendees']['coaches'])
+            data['students'] = \
+                '\n'.join(f"- {s['displayName']}" for s in event['attendees']['students'])
+            data['mentors'] = \
+                '\n'.join(f"- {m['displayName']}" for m in event['attendees']['mentors'])
+
+            # Replace placeholders in the template
             email = template
-
-            data['team'] = self.__conf['team']
-            data['event_id'] = event['raw']['id']
-
-            # Formatting date information
-            start = event['dates']['start']
-            end = event['dates']['end']
-            data['start_time'] = \
-                f"{start.strftime('%A, %d. %B %Y')} at {start.strftime('%I:%M%p')}"
-            data['end_time'] = \
-                f"{end.strftime('%A, %d. %B %Y')} at {end.strftime('%I:%M%p')}"
-            data['date'] = f"{event['dates']['start'].strftime('%A, %d. %B %Y')}"
-
-            # Formatting coaches list
-            if 'coaches' in event['attendees'] :
-                coaches = ''
-                for coach in event['attendees']['coaches'] :
-                    if 'names' in coach and 'displayName' in coach['names'][0]:
-                        coaches = coaches + f'- {coach['names'][0]['displayName']}\n'
-                data['adults'] = coaches
-
-            # Formatting students list
-            if 'students' in event['attendees'] :
-                students = ''
-                for student in event['attendees']['students'] :
-                    if 'names' in student and 'displayName' in student['names'][0]:
-                        students = students + f'- {student['names'][0]['displayName']}\n'
-                data['students'] = students
-
-            # Formatting mentors list
-            if 'mentors' in event['attendees'] :
-                mentors = ''
-                for mentor in event['attendees']['mentors'] :
-                    if 'names' in mentor and 'displayName' in mentor['names'][0]:
-                        mentors = mentors + f'- {mentor['names'][0]['displayName']}\n'
-                data['mentors'] = mentors
-
             for key, value in data.items():
                 email = email.replace(f"{{{{{key}}}}}", value)
             self.__events[i_event]['mail'] = email
 
-            self.__logger.info(
-                "---> Producing message of size %d",
-                len(email)
-            )
+            self.__logger.info("---> Producing message of size %d", len(email))
 
-#pylint: disable=R0915
-    def send_emails(self) :
-        """ Sending emails to recipients """
+    def send_emails(self):
+        """
+        Send emails using either microsoft API or a specific smtp and imap servers
+        Parameters :
+        Returns    :
+        Throws     :
+        """
 
-        mail_service = self.__initialize_service('gmail', 'v1')
-        calendar_service = self.__initialize_service('calendar', 'v3')
-        self.__logger.info('SENDING EMAILS TO %s',self.__conf['mail']['to'].upper())
+        self.__logger.info('SENDING EMAILS TO %s', self.__conf['mail']['to'].upper())
 
-        for i_event,event in enumerate(self.__events) :
+        for event in self.__events:
 
-            title_start_index = event['mail'].find('Subject:')
-            title_end_index = event['mail'].find('\n', title_start_index)
-            content_start_index = title_end_index + 1
-            content_end_index = len(event['mail'])
-            message_text = event['mail'][content_start_index:content_end_index]
+            message = self.__format_email_object(event['mail'])
             has_been_sent = False
 
-            if self.__conf['mail']['from']['address'] == "mantabots.infra@gmail.com" :
+            if self.__conf['mail']['from']['address'] == self.__user['mail']:
 
-                self.__logger.info('---> Sending email using google API')
+                # Use Microsoft Graph API to send email
+                try:
 
-                try :
-                    message = MIMEText(message_text)
-                    message['subject'] = \
-                        event['mail'][title_start_index + len('Subject:'):title_end_index].strip()
-                    message['to'] = self.__conf['mail']['to']
-                    message['from'] = self.__conf['mail']['from']['address']
-                    raw = urlsafe_b64encode(message.as_bytes()).decode()
-                    message_body = {'raw': raw}
-                    mail_service.users().messages().send(userId='me', body=message_body).execute()
+                    self.__logger.info('Sending email using Microsoft Graph')
+                    self.__send_email_using_microsoft(
+                        message,
+                        self.__conf['mail']['to'],
+                        self.__token)
                     has_been_sent = True
-
                 except Exception as e:
-                    self.__logger.error("Failed to send email : %s",str(e))
-
+                    self.__logger.error("Failed to send email : %s", str(e))
 
             else :
 
-                self.__logger.info('---> Sending email using smtp server coordinates')
-
-                # Create the email message
-                message = MIMEMultipart()
-                message['From'] = self.__conf['mail']['from']['address']
-                message['To'] = self.__conf['mail']['to']
-                message['Subject'] = \
-                    event['mail'][title_start_index + len('Subject:'):title_end_index].strip()
-
-                # Attach the body with MIMEText
-                message.attach(MIMEText(message_text, 'plain'))
-
-                # Send the email via SMTP server
+                # Use Dedicated SMTP server to send email
                 try:
-                    if self.__smtp:
-                        server = self.__smtp
-                    else :
-                        server = SMTP(
+
+                    self.__logger.info('---> Sending email using smtp server coordinates')
+                    self.__send_email_using_smtp_server(
+                        message,
+                        self.__conf['mail']['from']['address'],
+                        self.__conf['mail']['to'],
                         self.__conf['mail']['from']['smtp_server'],
-                        self.__conf['mail']['from']['smtp_port'], timeout=10)
-                    server.ehlo()  # Identify ourselves to the SMTP server
-                    server.starttls()  # Secure the connection with TLS
-                    server.ehlo()  # Re-identify ourselves as an encrypted connection
-                    server.login(
-                        self.__conf['mail']['from']['address'],
+                        self.__conf['mail']['from']['imap_server'],
                         self.__conf['mail']['from']['password'])
-                    self.__logger.info('---> Logged in')
-                    server.sendmail(
-                        self.__conf['mail']['from']['address'],
-                        self.__conf['mail']['to'], message.as_string())
-                    self.__logger.info("Email sent successfully!")
                     has_been_sent = True
-
                 except Exception as e:
-                    self.__logger.error("Failed to send email : %s",str(e))
-
+                    self.__logger.error("Failed to send email : %s", str(e))
             if has_been_sent :
-                # Update event in calendar to mark as sent
-                start_day = event['dates']['start'].strftime('%A, %d. %B %Y')
-                end_day = event['dates']['end'].strftime('%A, %d. %B %Y')
-                start_time = event['dates']['start'].strftime('%I:%M%p')
-                end_time = event['dates']['end'].strftime('%I:%M%p')
-                self.__events[i_event]['raw']['extendedProperties'] = {
-                    'private' : {
-                        'sent'  : True,
-                        'start' : f"{start_day} at {start_time}",
-                        'end'   : f"{end_day} at {end_time}"
-                    }
-                }
-                calendar_service.events().update(
-                    calendarId=self.__conf['calendar']['id'], eventId=event['raw']['id'],
-                    body=event['raw']).execute()
 
-#pylint: enable=R0914,R0915
+                self.__logger.info("--> Email sent successfully!")
+                self.__update_registration_status(
+                    event['raw']['id'],
+                    self.__token,
+                    event['dates']['start'],
+                    event['dates']['end'])
+                self.__logger.info("--> Event status updated!")
 
-    def __initialize_credentials(self):
-        """ Gather credentials and initialize the required Google API service """
+    def __get_token(self):
+        """
+        Get a token for the autorized user from a refresh token
+        Parameters    :
+        Returns (str) : The authentication token
+        Throws        : Exception if the calendar list retrieval fails
+        """
 
-        # Initialize credentials for authorized user
-        if self.__credentials and self.__credentials.expired and self.__credentials.refresh_token:
-            self.__logger.info("---> Refreshing oauth user token")
-            self.__credentials.refresh(Request())
-        else:
-            self.__credentials = Credentials.from_authorized_user_file(
-                self.__credentials_file, scopes=Registration.s_scopes
-            )
+        # Data payload for the token request
+        data = {
+            'client_id': self.__credentials['client_id'],
+            'client_secret': self.__credentials['client_secret'],
+            'refresh_token': self.__credentials['refresh_token'],
+            'grant_type': 'refresh_token',
+            'redirect_uri': 'https://mantabots.org',
+            'scope': Registration.s_scopes
+        }
 
-    def __initialize_service(self, api, version):
-        """ Initialize the Google API service """
+        # Make the POST request to acquire a new access token using the refresh token
+        # USING THE COMMON ENDPOINT TO ACCESS PERSONAL ACCOUNTS IS KEY
+        endpoint = 'https://login.microsoftonline.com/common/oauth2/v2.0/token'
+        response = self.__post(endpoint, data=data)
 
-        result = None
-        self.__initialize_credentials()
-        if self.__google:
-            # Use the injected mock service if provided
-            result = self.__google.build_service(api, version, credentials=self.__credentials)
-        else:
-            result = build(api, version, credentials=self.__credentials, cache_discovery=False)
+        # Check if the request was successful
+        if response.status_code != 200:
+            raise Exception(f"Error acquiring token: {response.content}")
+
+        # Parse the JSON response
+        token_response = response.json()
+
+        # Acquire an access token
+        if "access_token" not in token_response:
+            raise Exception(f"Error acquiring token: {token_response.get('error_description')}")
+
+        # Return the access token
+        return token_response['access_token']
+
+    def __get_user(self, token) :
+        """
+        Retrieve the authorized user information
+        Parameters     :
+            token (str) : Access token for the Microsoft Graph API
+        Returns (dict) : The authorized user information
+        Throws         : Exception if the calendar list retrieval fails
+        """
+
+        result = {}
+        # Get my current microsoft email
+        endpoint = "https://graph.microsoft.com/v1.0/me"
+        headers = { 'Authorization': f'Bearer {token}','Content-Type': 'application/json'}
+
+        response = self.__get(endpoint, headers=headers)
+
+        if response.status_code == 200: result = response.json()
+        else : raise Exception(f"Failed retrieving user with error : {response.content}")
 
         return result
 
-    def __initialize_contacts(self):
-        """ Gather all contacts in the account contacts list """
-        result = []
+    def __initialize_contacts(self, token):
+        """
+        Retrieve all the user contacts
+        Parameters      :
+            token (str) : Access token for the Microsoft Graph API
+        Returns (array) : The list of all contacts
+        Throws          : Exception if the calendar list retrieval fails
+        """
 
+        result = []
         self.__logger.info("---> Preloading contacts")
 
-        service = self.__initialize_service('people', 'v1')
-        if not service:
-            self.__logger.error("Failed to initialize People API service")
-            return result
+        # Define the endpoint and headers for the contacts request
+        endpoint = "https://graph.microsoft.com/v1.0/me/contacts"
+        headers = { 'Authorization': f'Bearer {token}', 'Content-Type': 'application/json' }
 
-        try:
-            results = service.people().connections().list(
-                resourceName='people/me', pageSize=100,
-                personFields='names,emailAddresses,organizations'
-            ).execute()
+        # Send the request to get contacts
+        response = self.__get(endpoint, headers=headers,
+            params={'$top': 25, '$select': 'displayName,emailAddresses,jobTitle'})
+        if response.status_code == 200: result = response.json().get('value', [])
+        else : raise Exception(f"Failed retrieving contacts with error : {response.content}")
 
-            connections = results.get('connections', [])
-            result = connections
-            self.__logger.info("---> Found %d contacts",len(result))
-
-        except Exception as e:
-            self.__logger.error("Error retrieving contacts: %s",str(e))
+        self.__logger.info("---> Found %d contacts",len(result))
 
         return result
 
-    def __compute_timeslot(self, event, is_full_day) :
-        """ Compute event registration timeslot from event data and configuration """
+    def __get_calendar_id(self, name, token):
+        """
+        Retrieve the identifier of a calendar from its name
+        Parameters    :
+            name (str)  : The name of the calendar
+            token (str) : Access token for the Microsoft Graph API
+        Returns (str) : the calendar identifier
+        Throws        : Exception if the calendar list retrieval fails
+        """
+
+        result = ''
+
+        # Get all calendars
+        headers = { 'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
+        endpoint = "https://graph.microsoft.com/v1.0/me/calendars"
+        response = self.__get(endpoint, headers=headers)
+        if response.status_code == 200: calendars = response.json().get('value', [])
+        else : raise Exception(f"Failed retrieving calendars list with error : {response.content}")
+
+        # Look for calendar with correct id
+        for calendar in calendars :
+            if calendar['name'] == name : result = calendar['id']
+        if result == '' : self.__logger.error('Calendar %s not found', name)
+
+        return result
+
+    def __get_events(self, calendar, days, token):
+        """
+        Retrieve all events from a calendar
+        Parameters      :
+            calendar (str) : Identifier of the calendar to search
+            days (int)     : Number of days to search for from now
+            token (str)    : Access token for the Microsoft Graph API
+        Returns (array) : list of the calendar events
+        Throws          : Exception if the retrieval fails
+        """
+
+        result = []
+
+        # Get all events
+        endpoint = f"https://graph.microsoft.com/v1.0/me/calendars/{calendar}/calendarview"
+        headers = { 'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
+
+        now = datetime.now(timezone.utc)
+        params = {
+            'startDateTime': now.isoformat(timespec='seconds'),
+            'endDateTime': (now + timedelta(days=days)).isoformat(timespec='seconds'),
+            '$orderby': 'start/dateTime',
+            '$top': 10
+        }
+
+        # Send the request to get calendar events
+        response = self.__get(endpoint, headers=headers, params=params)
+        if response.status_code == 200: result = response.json().get('value', [])
+        else : raise Exception(f"Failed retrieving events with error : {response.content}")
+
+        return result
+
+    def __compute_registration_timeslot(self, event, is_full_day):
+        """
+        Compute registration timeslot for current event
+        Parameters     :
+            extension (dict) : Identifier of the event to update
+        Returns (dict) : datetimes corresponding to the last registration dates (UTC)
+        Throws         : Exception if the update fails
+        """
 
         result = {}
+        if 'start' in event:
+            if 'dateTime' in event['start']:
 
-        if 'start' in event :
-            if 'date' in event['start'] :
+                result['start'] = \
+                    datetime.strptime(event['start']['dateTime'][:26], '%Y-%m-%dT%H:%M:%S.%f')
+                utc = ZoneInfo(event['start']['timeZone'])
+                result['start'] = result['start'].replace(tzinfo=utc)
 
-                # Full day event
-                result['start'] = datetime.strptime(event['start']['date'], '%Y-%m-%d')
-                result['end'] = datetime.strptime(event['end']['date'], '%Y-%m-%d')
+                result['end'] = \
+                    datetime.strptime(event['end']['dateTime'][:26], '%Y-%m-%dT%H:%M:%S.%f')
+                utc = ZoneInfo(event['end']['timeZone'])
+                result['end'] = result['end'].replace(tzinfo=utc)
 
-            elif 'dateTime' in event['start'] :
+                if event['isAllDay'] :
+                    # Full days event appear to start at 00:00 UTC, even if created in another timezone
+                    # Date data are not reliable, so we need to switch them to local timezone
+                    local = ZoneInfo(self.__conf['calendar']['time_zone'])
+                    result['start'] = result['start'].replace(tzinfo=local)
+                    result['start'] = result['start'].astimezone(utc)
+                    result['end'] = result['end'].replace(tzinfo=local)
+                    result['end'] = result['end'] + timedelta(seconds=-1)
+                    result['end'] = result['end'].astimezone(utc)
 
-                result['start']  = \
-                    datetime.strptime(event['start']['dateTime'], '%Y-%m-%dT%H:%M:%S%z')
-                result['end']  = \
-                    datetime.strptime(event['end']['dateTime'], '%Y-%m-%dT%H:%M:%S%z')
                 if is_full_day :
-                    result['start'] = result['start'].replace(hour=0,minute=0,second=0)
-                    result['end'] = result['end'].replace(hour=23,minute=59,second=59)
+                    local = ZoneInfo(self.__conf['calendar']['time_zone'])
+                    result['start'] = result['start'].astimezone(local)
+                    result['start'] = result['start'].replace(hour=0, minute=0, second=0)
+                    result['start'] = result['start'].astimezone(utc)
+                    result['end'] = result['end'].astimezone(local)
+                    result['end'] = result['end'].replace(hour=23, minute=59, second=59)
+                    result['end'] = result['end'].astimezone(utc)
+
 
         return result
 
-    def __read_last_dates(self,event) :
-        """ """
+    def __get_registration_status(self, identifier, token) :
+        """
+        Get registration status for the event (see __update_registration_status)
+        Parameters     :
+            identifier (str) : Identifier of the event to analyze
+            token (str)      : Access token for the Microsoft Graph API
+        Returns (dict) : Registration status
+        Throws         : Exception if the update fails
+        """
+
         result = {}
 
-        if 'extendedProperties' in event :
-            if 'private' in event['extendedProperties'] :
-                if 'sent' in event['extendedProperties']['private'] and \
-                    event['extendedProperties']['private']['sent'] == 'true':
+        headers = { 'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
+        endpoint = \
+            f"https://graph.microsoft.com/v1.0/me/events/{identifier}/extensions/org.mantabots"
+        response = self.__get(endpoint, headers=headers, params={})
 
-                    result['start'] = \
-                        datetime.strptime(event['extendedProperties']['private']['start'],
-                            '%A, %d. %B %Y at %I:%M%p')
-                    result['end'] = \
-                        datetime.strptime(event['extendedProperties']['private']['end'],
-                            '%A, %d. %B %Y at %I:%M%p')
+        if response.status_code == 200:
+            extension = loads(response.content.decode('utf-8'))
+
+            if 'sent' in extension and extension['sent']:
+                result['start'] = datetime.strptime(extension['start'],'%Y-%m-%dT%H:%M:%S%z')
+                result['end'] = datetime.strptime(extension['end'],'%Y-%m-%dT%H:%M:%S%z')
+                result['start'].replace(tzinfo=timezone.utc)
+                result['end'].replace(tzinfo=timezone.utc)
 
         return result
 
-#pylint: enable=R0902, E1101
+    def __format_email_object(self, email):
+        """
+        Separate the email content into subject and body
+        Parameters     :
+            email (str) : Email from pattern
+        Returns (dict) : Message with subject and body
+        Throws         : Exception if the update fails
+        """
+        result =  {'subject' : '', 'content' : ''}
 
-#pylint: disable=W0107
+        title_start_index = email.find('Subject:')
+        title_end_index = email.find('\n', title_start_index)
+        if title_start_index < 0 or title_end_index < 0:
+            raise Exception('Failed to parse email title')
+        result['subject'] = email[title_start_index + len('Subject:'):title_end_index].strip()
+
+        content_start_index = title_end_index + 1
+        content_end_index = len(email)
+        if content_start_index < 0 or content_end_index < 0:
+            raise Exception('Failed to parse email content')
+        result['content'] = email[content_start_index:content_end_index]
+
+        return result
+
+    def __send_email_using_microsoft(self, message, recipient, token):
+        """
+        Send email from authorized user using Microsoft Graph API
+        Parameters     :
+            message (str)   : Email content
+            recipient (str) : Recipient address
+            token (str)     : Access token for the Microsoft Graph API
+        Returns (dict) :
+        Throws         : Exception if the sending fails
+        """
+
+        endpoint = "https://graph.microsoft.com/v1.0/me/sendMail"
+        headers = { 'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
+        email_message = {
+            "message": {
+                "subject": message['subject'],
+                "body": { "contentType": "Text", "content": message['content'] },
+                "toRecipients": [
+                    { "emailAddress": { "address": recipient  } }
+                ]
+            },
+            "saveToSentItems": "true"
+        }
+
+        # Send email via Microsoft Graph
+        response  = self.__post(endpoint, headers=headers, json=email_message)
+        if response.status_code != 202:
+            raise Exception(f"Failed to send email : {response.content}")
+
+#pylint: disable=R0913
+    def __send_email_using_smtp_server(self, message, sender, recipient, smtp, imap, password):
+        """
+        Send email from user using SMTP server
+        Parameters     :
+            message (str)   : Email content
+            sender (str)    : Sender address
+            password(str)   : Sender password
+            recipient (str) : Recipient address
+            smtp (dict)     : SMTP server address and port
+            imap (dict)     : IMAP server address and port
+        Returns (dict) :
+        Throws         : Exception if the sending fails
+        """
+
+        # Create the email message
+        result = MIMEMultipart()
+        result['From'] = sender
+        result['To'] = recipient
+        result['Subject'] = message['subject']
+        result.attach(MIMEText(message['content'], 'plain'))
+
+        # Send the email via SMTP server
+        if self.__smtp: server = self.__smtp
+        else : server = SMTP(smtp['host'], smtp['port'], timeout=10)
+
+        server.ehlo()  # Identify ourselves to the SMTP server
+        server.starttls()  # Secure the connection with TLS
+        server.ehlo()  # Re-identify ourselves as an encrypted connection
+        server.login(sender, password)
+        self.__logger.info('---> Logged in smtp server')
+        server.sendmail(sender, recipient, result.as_string())
+        server.quit()
+
+        # Copy the email in the sent folder
+        if self.__imap: server = self.__imap
+        else : server = IMAP4_SSL(imap['host'], imap['port'])
+        server.login(sender, password)
+        self.__logger.info('---> Logged in imap server')
+        server.append('Sent', '\\Seen', Time2Internaldate(time()), result.as_bytes())
+        server.logout()
+
+#pylint: enable=R0913
+
+    def __update_registration_status(self, identifier, token, start, end):
+        """
+        Update event in calendar to mark it as sent, with the associated registration date
+        Parameters     :
+            identifier (str) : Identifier of the event to update
+            token (str)      : Access token for the Microsoft Graph API
+        Returns        : Nothing
+        Throws         : Exception if the update fails
+        """
+
+        headers = { 'Authorization': f'Bearer {token}', 'Content-Type': 'application/json'}
+        endpoint = f"https://graph.microsoft.com/v1.0/me/events/{identifier}/extensions"
+        tz = ZoneInfo('UTC')
+
+        custom_properties = {
+            "@odata.type": "microsoft.graph.openTypeExtension",
+            "extensionName": "org.mantabots",
+            'sent'  : True,
+            'start' : start.astimezone(tz).strftime('%Y-%m-%dT%H:%M:%S%z'),
+            'end'   : end.astimezone(tz).strftime('%Y-%m-%dT%H:%M:%S%z')
+        }
+        response = self.__post(endpoint, headers=headers, json=custom_properties)
+
+        if response.status_code != 201:
+            raise Exception(f"Failed to update extensions with error : {response.text}")
+
+# pylint: disable=W0107
+# Main function using Click for command-line options
 @group()
 def main():
     """ Main click group """
     pass
-#pylint: enable=W0107
+# pylint: enable=W0107, W0719
+
 
 @main.command()
 @option('--conf', default='conf/conf.json')
-@option('--google', default='token.json')
-@option('--smtp', default='')
+@option('--microsoft', default='token.json')
+@option('--mail', default='')
 @option('--receiver', default='nadege.lemperiere@gmail.com')
-@option('--sender', default='mantabots.infra@gmail.com')
-def run(conf, google, smtp, receiver, sender):
-
+@option('--sender', default='mantabots.infra@outlook.com')
+def run(conf, microsoft, mail, receiver, sender):
     """ Script run function """
-    registration = Registration(google, smtp)
+    registration = Registration(microsoft, mail)
     registration.configure(conf, receiver, sender)
     registration.search_events()
     registration.get_attendees()

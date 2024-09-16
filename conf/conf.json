@@ -2,19 +2,26 @@
     "team" : "MantaBots",
     "mail" : {
         "from" : {
-            "smtp_server" : "smtp.migadu.com",
-            "smtp_port"   : 587,
-            "address"     : "coaches@mantabots.org"
+            "smtp_server" : {
+                "host" : "smtp.migadu.com",
+                "port" : 587
+            },
+            "imap_server" : {
+                "host" : "imap.migadu.com",
+                "port" : 993
+            },
+            "address"     : "mantabots.infra@outlook.com"
         },
         "to" : "nadege.lemperiere@gmail.com",
         "pattern" : "conf/mail-pattern.txt"
     },
     "calendar" : {
-        "id" : "b112c01dea91f1107325232c37852b1bc6985d7217232ce0cb4664a04debaed2@group.calendar.google.com",
-        "topic" : "Team Session",
-        "days" : 1,
-        "full_day" : "True"
+        "name"      : "2024-2025 IntoTheDeep Team Calendar",
+        "topic"     : "Team Session",
+        "days"      : 1,
+        "full_day"  : "True",
+        "time_zone" : "America/New_York"
     }
-    
+
 }
 
