@@ -30,13 +30,13 @@ jobs:
 
             - name: Get token
               env:
-                GCP_TOKEN: ${{secrets.GCP_TOKEN}}
+                GCP_TOKEN: ${{secrets.MICROSOFT_TOKEN}}
               shell: bash
               run: echo "$GCP_TOKEN" >> token.json
 
             - name: Launch registration
               env:
-                SMTP_PASSWORD: ${{secrets.SMTP_PASSWORD}}
+                SMTP_PASSWORD: ${{secrets.MAIL_PASSWORD}}
                 RECIPIENT: ${{vars.RECIPIENT}}
                 SENDER: ${{vars.SENDER}}
               run: ./scripts/register.sh -p ${SMTP_PASSWORD} -t ${RECIPIENT} -f ${SENDER}
