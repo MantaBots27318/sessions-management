@@ -68,10 +68,6 @@ Prerequisites
 
 .. image:: doc/azure-app-auth.png
 
-   * Supported account types shall be set to **Accounts in any organizational directory and personal Microsoft accounts**
-   * Redirect URI shall be set to https://mantabots.org
-   * Implicit grant shall be set to Access tokens and ID tokens
-
 
 - The app shall be granted the following API permissions :
 
