@@ -146,8 +146,8 @@ def check_final_state(scenario, results) :
                     if event['full_day'] == 'true' : end_date = end_date + timedelta(seconds=-1)
                     elif scenario['results']['full'] == 'true' and event['full_day'] != 'true':
                         start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
-                        end_date = end_date.replace(hour=0, minute=0, second=0, microsecond=0)
                         end_date = end_date + timedelta(seconds=-1)
+                        end_date = end_date.replace(hour=23, minute=59, second=59, microsecond=0)
                     start_date = start_date.astimezone(tz)
                     end_date = end_date.astimezone(tz)
                     start_date_utc   = start_date.strftime('%Y-%m-%dT%H:%M:%S%z')
@@ -166,6 +166,7 @@ def check_final_state(scenario, results) :
                     local_test['content'] = local_test['content'].replace('{{end_time}}',end_date_local.strftime('%I:%M%p'))
 
                     logger.debug(event)
+
 
                     if not 'extendedProperties' in event : raise Exception('Event not updated after email sent')
                     if not 'private' in event['extendedProperties'] : raise Exception('Event not updated after email sent')

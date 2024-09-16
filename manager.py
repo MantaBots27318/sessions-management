@@ -288,7 +288,7 @@ class Registration:
                 'team': self.__conf['team'],
                 'event_id': event['raw']['id'],
                 'start_time': start.strftime('%A, %d. %B %Y at %I:%M%p'),
-                'end_time': end.astimezone(tz).strftime('%A, %d. %B %Y at %I:%M%p'),
+                'end_time': end.strftime('%A, %d. %B %Y at %I:%M%p'),
                 'date': event['dates']['start'].strftime('%A, %d. %B %Y')
             }
 
@@ -519,21 +519,33 @@ class Registration:
 
                 result['start'] = \
                     datetime.strptime(event['start']['dateTime'][:26], '%Y-%m-%dT%H:%M:%S.%f')
-                tz = ZoneInfo(event['start']['timeZone'])
-                result['start'] = result['start'].replace(tzinfo=tz)
+                utc = ZoneInfo(event['start']['timeZone'])
+                result['start'] = result['start'].replace(tzinfo=utc)
 
                 result['end'] = \
                     datetime.strptime(event['end']['dateTime'][:26], '%Y-%m-%dT%H:%M:%S.%f')
-                tz = ZoneInfo(event['end']['timeZone'])
-                result['end'] = result['end'].replace(tzinfo=tz)
+                utc = ZoneInfo(event['end']['timeZone'])
+                result['end'] = result['end'].replace(tzinfo=utc)
 
-                if is_full_day or event['isAllDay'] :
-                    tz = ZoneInfo(self.__conf['calendar']['time_zone'])
+                if event['isAllDay'] :
+                    # Full days event appear to start at 00:00 UTC, even if created in another timezone
+                    # Date data are not reliable, so we need to switch them to local timezone
+                    local = ZoneInfo(self.__conf['calendar']['time_zone'])
+                    result['start'] = result['start'].replace(tzinfo=local)
+                    result['start'] = result['start'].astimezone(utc)
+                    result['end'] = result['end'].replace(tzinfo=local)
+                    result['end'] = result['end'] + timedelta(seconds=-1)
+                    result['end'] = result['end'].astimezone(utc)
+
+                if is_full_day :
+                    local = ZoneInfo(self.__conf['calendar']['time_zone'])
+                    result['start'] = result['start'].astimezone(local)
                     result['start'] = result['start'].replace(hour=0, minute=0, second=0)
-                    result['end'] = result['end'] + timedelta(days=-1)
+                    result['start'] = result['start'].astimezone(utc)
+                    result['end'] = result['end'].astimezone(local)
                     result['end'] = result['end'].replace(hour=23, minute=59, second=59)
-                    result['start'] = result['start'].replace(tzinfo=tz)
-                    result['end'] = result['end'].replace(tzinfo=tz)
+                    result['end'] = result['end'].astimezone(utc)
+
 
         return result
 

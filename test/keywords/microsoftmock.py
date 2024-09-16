@@ -24,8 +24,6 @@ class MockMicrosoftLibrary:
 
     def get(self, endpoint, headers={}, params={}) :
 
-        print(endpoint)
-
         response = MockMicrosoftResponse()
         if endpoint == 'https://graph.microsoft.com/v1.0/me' :
             response.status_code  = 200
@@ -70,7 +68,6 @@ class MockMicrosoftLibrary:
     def post(self, endpoint, headers={}, params={}, data={}, json={}) :
 
         response = MockMicrosoftResponse()
-        print(endpoint)
         if endpoint.startswith('https://graph.microsoft.com/v1.0/me/events/') and \
              endpoint.find('/extensions') > 0 :
             try :
@@ -112,9 +109,9 @@ class MockMicrosoftLibrary:
                 if temp['full_day'] == 'true': temp['isAllDay'] = True
                 else : temp['isAllDay'] = False
 
-                timezone = ZoneInfo('UTC')
-                start = temp['start']['date'].astimezone(timezone)
-                end = temp['end']['date'].astimezone(timezone)
+                utc = ZoneInfo('UTC')
+                start = temp['start']['date'].astimezone(utc)
+                end = temp['end']['date'].astimezone(utc)
                 temp['start']['dateTime'] = start.strftime('%Y-%m-%dT%H:%M:%S.%f') + '0'
                 temp['end']['dateTime'] = end.strftime('%Y-%m-%dT%H:%M:%S.%f') + '0'
                 temp['start']['timeZone'] = 'UTC'
@@ -124,6 +121,12 @@ class MockMicrosoftLibrary:
 
                 if end.timestamp()  >= datetime.fromisoformat(timeMin).timestamp()  and \
                 start.timestamp()  < datetime.fromisoformat(timeMax).timestamp()  :
+                    if temp['full_day'] == 'true':
+                        # Mock the error microsoft does on full event, not taking into account the creation timezone
+                        start = start.replace(hour=0, minute=0, second=0, microsecond=0)
+                        end = end.replace(hour=0, minute=0, second=0, microsecond=0)
+                        temp['start']['dateTime'] = start.strftime('%Y-%m-%dT%H:%M:%S.%f') + '0'
+                        temp['end']['dateTime'] = end.strftime('%Y-%m-%dT%H:%M:%S.%f') + '0'
                     result.append(temp)
 
         return result
