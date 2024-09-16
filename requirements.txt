@@ -1,4 +1,2 @@
 click==8.1.7
-msal==1.31.0
-azure-identity==1.17.1
-msgraph-sdk==1.7.0
+requests==2.32.3

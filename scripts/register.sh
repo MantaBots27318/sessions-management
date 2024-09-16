@@ -22,7 +22,7 @@ do
           i) args+=" --client-id ${OPTARG}";;
           s) args+=" --client-secret ${OPTARG}";;
           c) args+=" --conf \"${OPTARG}\"";;
-          p) args+=" --smtp ${OPTARG}";;
+          p) args+=" --mail ${OPTARG}";;
           t) args+=" --receiver ${OPTARG}";;
           f) args+=" --sender ${OPTARG}";;
           r) args+=" --refresh-token ${OPTARG}";;

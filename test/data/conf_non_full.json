@@ -2,19 +2,26 @@
     "team" : "TestBots",
     "mail" : {
         "from" : {
-            "smtp_server" : "smtp.test.org",
-            "smtp_port"   : 587,
+            "smtp_server" : {
+                "host" : "smtp.test.org",
+                "port" : 587
+            },
+            "imap_server" : {
+                "host" : "imap.test.org",
+                "port" : 993
+            },
             "address"     : "test@test.org"
         },
         "to" : "moi@moi.com",
         "pattern" : "test/data/mail-pattern.txt"
     },
     "calendar" : {
-        "id" : "cid",
+        "name" : "Test Calendar",
         "topic" : "Team Session",
         "days" : 1,
-        "full_day" : "False"
+        "full_day" : "False",
+        "time_zone" : "America/New_York"
     }
-    
+
 }
 
