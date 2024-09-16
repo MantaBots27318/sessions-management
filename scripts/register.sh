@@ -18,7 +18,7 @@ args=""
 while getopts m:i:s:c:p:t:f:r: flag
 do
     case "${flag}" in
-          k) args+=" --microsoft ${OPTARG}";;;
+          k) args+=" --microsoft ${OPTARG}";;
           c) args+=" --conf \"${OPTARG}\"";;
           p) args+=" --mail ${OPTARG}";;
           t) args+=" --receiver ${OPTARG}";;

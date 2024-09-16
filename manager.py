@@ -556,7 +556,6 @@ class Registration:
 
         if response.status_code == 200:
             extension = loads(response.content.decode('utf-8'))
-            print(extension)
 
             if 'sent' in extension and extension['sent']:
                 result['start'] = datetime.strptime(extension['start'],'%Y-%m-%dT%H:%M:%S%z')

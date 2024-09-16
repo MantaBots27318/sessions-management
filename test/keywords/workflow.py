@@ -70,7 +70,6 @@ def build_scenario_data(scenario) :
         if 'calendar' in temp_conf and \
             'time_zone' in temp_conf['calendar'] :
             result['timezone'] = temp_conf['calendar']['time_zone']
-    print(result['timezone'])
 
     # Format datetime data
     for i_item, item in enumerate(result['data']['google']['items']) :
@@ -122,9 +121,6 @@ def check_final_state(scenario, results) :
     mails = results['smtp'].get_mails()
     events = results['microsoft'].scenario()['items']
 
-    print(len(mails))
-    print(len(scenario['results']['mails']))
-
     if len(mails) != len(scenario['results']['mails']) :
         raise Exception('Different number of emails sent')
 
@@ -147,19 +143,13 @@ def check_final_state(scenario, results) :
                     tz = ZoneInfo('UTC')
                     start_date = event['start']['date']
                     end_date = event['end']['date']
-                    print(start_date.strftime('%Y-%m-%dT%H:%M:%S%z'))
-                    print(end_date.strftime('%Y-%m-%dT%H:%M:%S%z'))
                     if event['full_day'] == 'true' : end_date = end_date + timedelta(seconds=-1)
                     elif scenario['results']['full'] == 'true' and event['full_day'] != 'true':
                         start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
                         end_date = end_date.replace(hour=0, minute=0, second=0, microsecond=0)
                         end_date = end_date + timedelta(seconds=-1)
-                    print(start_date.strftime('%Y-%m-%dT%H:%M:%S%z'))
-                    print(end_date.strftime('%Y-%m-%dT%H:%M:%S%z'))
                     start_date = start_date.astimezone(tz)
                     end_date = end_date.astimezone(tz)
-                    print(start_date.strftime('%Y-%m-%dT%H:%M:%S%z'))
-                    print(end_date.strftime('%Y-%m-%dT%H:%M:%S%z'))
                     start_date_utc   = start_date.strftime('%Y-%m-%dT%H:%M:%S%z')
                     end_date_utc     = end_date.strftime('%Y-%m-%dT%H:%M:%S%z')
                     start_date_local = start_date.astimezone(ZoneInfo(scenario['timezone']))
@@ -183,20 +173,11 @@ def check_final_state(scenario, results) :
                     if not 'start' in event['extendedProperties']['private'] : raise Exception('Event not updated after email sent')
                     if not 'end' in event['extendedProperties']['private'] : raise Exception('Event not updated after email sent')
                     if not event['extendedProperties']['private']['sent'] : raise Exception('Event sent status is not true')
-                    print(start_date_utc)
-                    print(event['extendedProperties']['private']['start'])
-                    print(end_date_utc)
-                    print(event['extendedProperties']['private']['end'])
                     if event['extendedProperties']['private']['start'] != start_date_utc : raise Exception('Start date does not match email')
                     if event['extendedProperties']['private']['end'] != end_date_utc : raise Exception('End date does not match email')
 
 
             if not found : raise Exception('Event id ' + event_id + ' not found')
-
-            print(mail['subject'] )
-            print(mail['content'] )
-            print(local_test['subject'] )
-            print(local_test['content'] )
 
             if test['from'] == mail['from'] and \
                test['to'] == mail['to'] and \
