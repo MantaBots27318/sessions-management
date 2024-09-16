@@ -31,7 +31,7 @@ Principle
 
 This python scripts performs the following steps :
 
-1) Analyze a Microsoft calendar to gather events using Google Calendar API:
+1) Analyze a Microsoft calendar to gather events using Microsoft Graph API:
 
    - Which are due to happen in the next N days
    - Whose Summary contains a given topic
