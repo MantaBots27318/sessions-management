@@ -74,16 +74,15 @@ Prerequisites
 
 
 - The app shall be granted the following API permissions :
-
-
-.. image:: doc/azure-app-api-permissions.png
-
-
    * offline_access enables to maintain the acquired authorization the app has for the Microsoft personal account
    * User.Read enables to get personal account information
    * Calendars.ReadWrite enables to get calendar events and update them with registration date
    * Contacts.Read enables to get contact list
    * Mail.Send enables to send email
+
+
+.. image:: doc/azure-app-api-permissions.png
+
 
 - A secret shall have been created for this user :
 
