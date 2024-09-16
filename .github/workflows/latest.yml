@@ -51,9 +51,9 @@ jobs:
 
             - name: Get token
               env:
-                GCP_TOKEN: ${{secrets.GCP_TOKEN}}
+                MICROSOFT_TOKEN: ${{secrets.MICROSOFT_TOKEN}}
               shell: bash
-              run: echo "$GCP_TOKEN" >> token.json
+              run: echo "$MICROSOFT_TOKEN" >> token.json
 
             - name: Launching tests
               continue-on-error: true
