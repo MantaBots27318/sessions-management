@@ -170,6 +170,7 @@ class Registration:
         else :
             self.__conf['calendar']['full_day'] = self.__conf['calendar']['full_day'] != 'False'
 
+#pylint: disable=R0914, R1702
     def search_events(self):
         """
         Search and select events to be registered
@@ -189,7 +190,7 @@ class Registration:
             for event in events :
 
                 # Retrieve the dates for which event has already been registered
-                last_dates = self.__get_registration_status(event['id'],self.__token)
+                last_reg = self.__get_registration_status(event['id'],self.__token)
 
                 # Compute the timeslot for which the event shall be registered
                 dates = self.__compute_registration_timeslot(
@@ -199,68 +200,48 @@ class Registration:
                 # Compute the difference between the current registration state, and the new ones
                 delta_start = timedelta(days=1)
                 delta_end = timedelta(days=1)
-                if 'start' in last_dates : delta_start = last_dates['start'] - dates['start']
-                if 'end' in last_dates : delta_end = dates['end'] - last_dates['end']
+                if 'start' in last_reg : delta_start = last_reg['start'] - dates['start']
+                if 'end' in last_reg : delta_end = dates['end'] - last_reg['end']
 
-                # If they differ, even if the event was already register, we register it again
-                shall_be_registered_once_again = False
-                if delta_start.total_seconds() > 0 or delta_end.total_seconds() > 0 :
-                    shall_be_registered_once_again = True
+                # Get names of students, coaches and mentors attending the event
+                # Compare it with the last registration to get the new attendees
+                attendees_list = self.__get_attendees(event, self.__contacts)
+                attendees = { 'all' : attendees_list, 'new' : attendees_list}
 
-                # Check if event shall be registered, using its status,
-                # its subject, and its registration status
+                if 'students' in last_reg and 'coaches' in last_reg :
+                    attendees['new'] = {'students' : [], 'coaches' : [], 'mentors': []}
+                    for role in attendees['all'] :
+                        for new in attendees['all'][role] :
+                            found = False
+                            if role in last_reg :
+                                for old in last_reg[role] :
+                                    if new['emailAddresses'][0]['address'] == old['emailAddresses'][0]['address'] :
+                                        found = True
+                            if not found : attendees['new'][role].append(new)
+
+                # Check if event shall be registered, using its status and its subject
+                # And only if there are people attending
                 topic = self.__conf['calendar']['topic']
                 if  'isCancelled' in event and not event['isCancelled'] and \
                     'subject' in event and topic in event['subject'] and \
-                    shall_be_registered_once_again :
-                    self.__events.append({'raw' : event, 'dates' : dates})
+                    len(attendees['all']['students']) + len(attendees['all']['coaches']) != 0 :
+
+                    # Check if the event was already registered but dates have changed or
+                    # if it has never been registered, in which case all the students
+                    # and coaches shall be registered
+                    if delta_start.total_seconds() > 0 or delta_end.total_seconds() > 0 :
+                        attendees['new'] = attendees['all']
+                        self.__events.append({'raw' : event, 'dates' : dates, 'attendees' : attendees})
+                    # Check if the event was already registered at the correct time
+                    # but attendees have changed, in this case only new attendees should be registered
+                    elif len(attendees['new']['students']) != 0 or len(attendees['new']['coaches']) != 0 :
+                        self.__events.append({'raw' : event, 'dates' : dates, 'attendees' : attendees})
 
         except Exception as e:
-            self.__logger.error("Error retrieving calendar: %s", str(e))
+            self.__logger.error("Error retrieving events: %s", str(e))
 
         self.__logger.info("---> Found %d events",len(self.__events))
-
-#pylint: disable=R1702
-    def get_attendees(self):
-        """
-        Update event attendees information from contacts information
-        Parameters :
-        Returns    :
-        Throws     :
-        """
-        self.__logger.info('GETTING ATTENDEES INFO FROM CONTACTS')
-
-        for i_event, event in enumerate(self.__events):
-
-            # Get event attendees
-            attendees = {'students': [], 'coaches': [], 'mentors': []}
-            if 'attendees' in event['raw']:
-                for attendee in event['raw']['attendees']:
-                    # Search for attendees in contacts by matching email address
-                    for contact in self.__contacts:
-                        if 'emailAddresses' in contact:
-                            for mail in contact['emailAddresses']:
-                                if mail['address'] == attendee['emailAddress']['address']:
-
-                                    # Append to list from job title
-                                    title = contact['jobTitle']
-                                    if title == 'Team Member':
-                                        attendees['students'].append(contact)
-                                    elif title == 'Coach':
-                                        attendees['coaches'].append(contact)
-                                    elif title == 'Mentor':
-                                        attendees['mentors'].append(contact)
-
-                self.__logger.info(
-                    "---> Found %d coaches %d students and %d mentors for event %s",
-                    len(attendees['coaches']),
-                    len(attendees['students']),
-                    len(attendees['mentors']),
-                    event['raw'].get('subject', 'No Subject')
-                )
-
-            self.__events[i_event]['attendees'] = attendees
-#pylint: enable=R1702
+#pylint: enable=R0914, R1702
 
     def prepare_emails(self):
         """
@@ -293,11 +274,11 @@ class Registration:
             }
 
             data['adults'] = \
-                '\n'.join(f"- {c['displayName']}" for c in event['attendees']['coaches'])
+                '\n'.join(f"- {c['displayName']}" for c in event['attendees']['new']['coaches'])
             data['students'] = \
-                '\n'.join(f"- {s['displayName']}" for s in event['attendees']['students'])
+                '\n'.join(f"- {s['displayName']}" for s in event['attendees']['new']['students'])
             data['mentors'] = \
-                '\n'.join(f"- {m['displayName']}" for m in event['attendees']['mentors'])
+                '\n'.join(f"- {m['displayName']}" for m in event['attendees']['new']['mentors'])
 
             # Replace placeholders in the template
             email = template
@@ -352,14 +333,15 @@ class Registration:
                     has_been_sent = True
                 except Exception as e:
                     self.__logger.error("Failed to send email : %s", str(e))
+
             if has_been_sent :
 
                 self.__logger.info("--> Email sent successfully!")
                 self.__update_registration_status(
                     event['raw']['id'],
                     self.__token,
-                    event['dates']['start'],
-                    event['dates']['end'])
+                    event['dates'],
+                    event['attendees']['all'])
                 self.__logger.info("--> Event status updated!")
 
     def __get_token(self):
@@ -574,8 +556,54 @@ class Registration:
                 result['end'] = datetime.strptime(extension['end'],'%Y-%m-%dT%H:%M:%S%z')
                 result['start'].replace(tzinfo=timezone.utc)
                 result['end'].replace(tzinfo=timezone.utc)
+                result['students'] = extension['students']
+                result['coaches'] = extension['coaches']
+                result['mentors'] = extension['mentors']
 
         return result
+
+#pylint: disable=R1702
+    def __get_attendees(self, event, contacts):
+        """
+        Update event attendees information from contacts information
+        Parameters     :
+            event (dict)    : Event to analyze for attendees
+            contacts (dict) : List of contacts to look for attendees
+        Returns (dict) : The list of students, mentors and coaches to register
+        Throws         :
+        """
+
+        result = {'students': [], 'coaches': [], 'mentors': []}
+        self.__logger.info('--> Getting attendees names from contacts list')
+
+        if 'attendees' in event:
+            for attendee in event['attendees']:
+                # Search for attendees in contacts by matching email address
+                for contact in contacts:
+                    if 'emailAddresses' in contact:
+                        for mail in contact['emailAddresses']:
+                            if mail['address'] == attendee['emailAddress']['address'] :
+
+                                # Append to list from job title
+                                title = contact['jobTitle']
+                                if title == 'Team Member':
+                                    result['students'].append(contact)
+                                elif title == 'Coach':
+                                    result['coaches'].append(contact)
+                                elif title == 'Mentor':
+                                    result['mentors'].append(contact)
+
+            self.__logger.info(
+                "---> Found %d coaches %d students and %d mentors for event %s",
+                len(result['coaches']),
+                len(result['students']),
+                len(result['mentors']),
+                event.get('subject', 'No Subject')
+            )
+
+        return result
+
+#pylint: enable=R1702
 
     def __format_email_object(self, email):
         """
@@ -674,12 +702,14 @@ class Registration:
 
 #pylint: enable=R0913
 
-    def __update_registration_status(self, identifier, token, start, end):
+    def __update_registration_status(self, identifier, token, dates, attendees):
         """
         Update event in calendar to mark it as sent, with the associated registration date
         Parameters     :
             identifier (str) : Identifier of the event to update
             token (str)      : Access token for the Microsoft Graph API
+            dates (dict)     : Start and end date of the registration
+            attendees (dict) : Lists of students, mentors and coaches
         Returns        : Nothing
         Throws         : Exception if the update fails
         """
@@ -691,9 +721,12 @@ class Registration:
         custom_properties = {
             "@odata.type": "microsoft.graph.openTypeExtension",
             "extensionName": "org.mantabots",
-            'sent'  : True,
-            'start' : start.astimezone(tz).strftime('%Y-%m-%dT%H:%M:%S%z'),
-            'end'   : end.astimezone(tz).strftime('%Y-%m-%dT%H:%M:%S%z')
+            'sent'     : True,
+            'start'    : dates['start'].astimezone(tz).strftime('%Y-%m-%dT%H:%M:%S%z'),
+            'end'      : dates['end'].astimezone(tz).strftime('%Y-%m-%dT%H:%M:%S%z'),
+            'students' : attendees['students'],
+            'coaches'  : attendees['coaches'],
+            'mentors'  : attendees['mentors']
         }
         response = self.__post(endpoint, headers=headers, json=custom_properties)
 
@@ -720,7 +753,6 @@ def run(conf, microsoft, mail, receiver, sender):
     registration = Registration(microsoft, mail)
     registration.configure(conf, receiver, sender)
     registration.search_events()
-    registration.get_attendees()
     registration.prepare_emails()
     registration.send_emails()
 
