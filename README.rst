@@ -66,13 +66,13 @@ Prerequisites
 - An app shall have been declared in Microsoft Entra ID, with the following authentication settings :
 
 
-.. image:: doc/azure-app-auth.png
+.. image:: doc/azure-app-authentication.png
 
 
 - The app shall be granted the following API permissions :
 
 
-.. image:: doc/azure-app.png
+.. image:: doc/azure-app-api-permissions.png
 
    * offline_access enables to maintain the acquired authorization the app has for the Microsoft personal account
    * User.Read enables to get personal account information
