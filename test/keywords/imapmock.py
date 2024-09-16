@@ -2,10 +2,10 @@
 # Copyright (c) [2024] FASNY
 # All rights reserved
 # -------------------------------------------------------
-""" SMTP server mock for testing """
+""" IMAP server mock for testing """
 # -------------------------------------------------------
-# Nadège LEMPERIERE, @11th September 2024
-# Latest revision: 11th September 2024
+# Nadège LEMPERIERE, @15th September 2024
+# Latest revision: 15th September 2024
 # -------------------------------------------------------
 
 # System includes

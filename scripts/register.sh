@@ -18,14 +18,11 @@ args=""
 while getopts m:i:s:c:p:t:f:r: flag
 do
     case "${flag}" in
-          m) args+=" --tenant-id ${OPTARG}";;
-          i) args+=" --client-id ${OPTARG}";;
-          s) args+=" --client-secret ${OPTARG}";;
+          k) args+=" --microsoft ${OPTARG}";;;
           c) args+=" --conf \"${OPTARG}\"";;
           p) args+=" --mail ${OPTARG}";;
           t) args+=" --receiver ${OPTARG}";;
           f) args+=" --sender ${OPTARG}";;
-          r) args+=" --refresh-token ${OPTARG}";;
     esac
 done
 
