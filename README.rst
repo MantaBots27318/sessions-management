@@ -69,10 +69,16 @@ Prerequisites
 .. image:: doc/azure-app-authentication.png
 
 
+   * Redirect URI shall be set to https://mantabots.org
+   * Implicit grant shall be set to Access tokens and ID tokens
+   * Access tokens shall be set to Read and write calendars in all mailboxes, Read user contacts, Send mail as a user, Read user profile
+
+
 - The app shall be granted the following API permissions :
 
 
 .. image:: doc/azure-app-api-permissions.png
+
 
    * offline_access enables to maintain the acquired authorization the app has for the Microsoft personal account
    * User.Read enables to get personal account information
