@@ -61,7 +61,10 @@ Prerequisites
 -------------
 
 - An Azure subscription shall have been created for the personal account owning the contact list
+
+
 - An app shall have been declared in Microsoft Entra ID, with the following authentication settings :
+
 
 .. image:: doc/azure-app-auth.png
 
@@ -71,6 +74,7 @@ Prerequisites
 
 
 - The app shall be granted the following API permissions :
+
 
 .. image:: doc/azure-app.png
 
