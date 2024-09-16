@@ -22,7 +22,7 @@ jobs:
         name: Launching registration process
         runs-on: ubuntu-latest
         container:
-          image: docker://python:latest
+          image: docker://python:3.12.6
           options: --entrypoint /bin/bash
         steps:
             - name: Checkout code

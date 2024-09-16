@@ -22,7 +22,7 @@ who generously host the MantaBots team
 Built And Packaged With
 -----------------------
 
-.. image:: https://img.shields.io/static/v1?label=python&message=3.12.5rc1&color=informational
+.. image:: https://img.shields.io/static/v1?label=python&message=3.12.6rc1&color=informational
    :target: https://www.python.org/
    :alt: Python
 
@@ -213,7 +213,7 @@ Testing
 Tested With
 -----------
 
-.. image:: https://img.shields.io/static/v1?label=python&message=3.12.5rc1&color=informational
+.. image:: https://img.shields.io/static/v1?label=python&message=3.12.6rc1&color=informational
    :target: https://www.python.org/
    :alt: Python
 .. image:: https://img.shields.io/static/v1?label=robotframework&message=7.1&color=informational
