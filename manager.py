@@ -743,7 +743,6 @@ class Registration:
             'students' : ';'.join(f"{dumps(s)}" for s in attendees['students']),
             'adults'   : ';'.join(f"{dumps(s)}" for s in attendees['adults'])
         }
-        print(custom_properties)
         response = self.__post(endpoint, headers=headers, json=custom_properties)
 
         if response.status_code != 201:

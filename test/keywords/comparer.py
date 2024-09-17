@@ -27,9 +27,6 @@ class Comparer :
     def compare_emails_number(expected, actual) :
         """ Compare the number of emails sent """
 
-        print(actual)
-        print(expected)
-
         logger.info(f'Sent {len(expected['data']['mails'])} emails [reference {len(actual['smtp'].get_mails())}]')
 
         if len(expected['data']['mails']) != len(actual['smtp'].get_mails()) :
@@ -60,8 +57,6 @@ class Comparer :
 
     def compare_email(expected, actual, timezone, is_full) :
         """ Compare the content of emails sent """
-
-        print(actual)
 
         dates = Comparer.compute_dates_as_string(actual['event'], timezone, is_full)
         local_test = Comparer.build_reference_from_pattern(expected, dates)
