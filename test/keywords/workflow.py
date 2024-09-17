@@ -109,7 +109,6 @@ def run_registration_workflow_with_mocks(scenario, receiver, sender) :
 @keyword('Check Final State')
 def check_final_state(reference, results) :
 
-    print(reference)
 
     mails = results['smtp'].get_mails()
     events = results['microsoft'].scenario()['events']
