@@ -12,7 +12,7 @@
 from logging import config, getLogger
 from datetime import datetime, timedelta, timezone
 from os import path
-from json import load, loads
+from json import load, loads, dumps
 from time import time
 from smtplib import SMTP
 from imaplib import IMAP4_SSL, Time2Internaldate
@@ -219,7 +219,7 @@ class Registration:
                             found = False
                             if role in last_reg :
                                 for old in last_reg[role] :
-                                    if new['emailAddresses'][0]['address'] == old['emailAddresses'][0]['address'] :
+                                    if new['mail'] == old['mail'] :
                                         found = True
                             if not found : attendees['new'][role].append(new)
                 self.__logger.debug('Current attendees : %s',str(attendees))
@@ -279,9 +279,9 @@ class Registration:
             }
 
             data['adults'] = \
-                '\n'.join(f"- {c['displayName']}" for c in event['attendees']['new']['adults'])
+                '\n'.join(f"- {c['name']}" for c in event['attendees']['new']['adults'])
             data['students'] = \
-                '\n'.join(f"- {s['displayName']}" for s in event['attendees']['new']['students'])
+                '\n'.join(f"- {s['name']}" for s in event['attendees']['new']['students'])
 
             # Replace placeholders in the template
             email = template
@@ -423,7 +423,7 @@ class Registration:
 
         # Send the request to get contacts
         response = self.__get(endpoint, headers=headers,
-            params={'$top': 25, '$select': 'displayName,emailAddresses,jobTitle'})
+            params={'$top': 25, '$select': 'displayName,emailAddresses,jobTitle,categories'})
         if response.status_code == 200: result = response.json().get('value', [])
         else : raise Exception(f"Failed retrieving contacts with error : {response.content}")
 
@@ -559,8 +559,15 @@ class Registration:
                 result['end'] = datetime.strptime(extension['end'],'%Y-%m-%dT%H:%M:%S.%f%z')
                 result['start'].replace(tzinfo=timezone.utc)
                 result['end'].replace(tzinfo=timezone.utc)
-                result['students'] = extension['students']
-                result['adults'] = extension['adults']
+                result['students'] = []
+                result['adults'] = []
+
+                if len(extension['students']) != 0 :
+                    for student in extension['students'].split(';') :
+                        result['students'].append(loads(student))
+                if len(extension['adults']) != 0 :
+                    for adult in extension['adults'].split(';') :
+                        result['adults'].append(loads(adult))
 
         return result
 
@@ -586,14 +593,19 @@ class Registration:
                         for mail in contact['emailAddresses']:
                             if mail['address'] == attendee['emailAddress']['address'] :
 
+                                data = {
+                                    'mail' : mail['address'],
+                                    'name' : contact['displayName']
+                                }
+
                                 # Append to list from categories
                                 has_been_added = False
                                 for category in contact['categories']:
                                     if category.lower() == 'student' :
-                                        result['students'].append(contact)
+                                        result['students'].append(data)
                                         has_been_added = True
                                     elif category.lower() == 'adult':
-                                        result['adults'].append(contact)
+                                        result['adults'].append(data)
                                         has_been_added = True
                                 if not has_been_added :
                                     self.__logger.warning('Contact %s not marked as student or adult', contact['displayName'])
@@ -728,9 +740,10 @@ class Registration:
             'sent'     : True,
             'start'    : dates['start'].astimezone(tz).strftime('%Y-%m-%dT%H:%M:%S.%f%z'),
             'end'      : dates['end'].astimezone(tz).strftime('%Y-%m-%dT%H:%M:%S.%f%z'),
-            'students' : attendees['students'],
-            'adults'  : attendees['adults']
+            'students' : ';'.join(f"{dumps(s)}" for s in attendees['students']),
+            'adults'   : ';'.join(f"{dumps(s)}" for s in attendees['adults'])
         }
+        print(custom_properties)
         response = self.__post(endpoint, headers=headers, json=custom_properties)
 
         if response.status_code != 201:
