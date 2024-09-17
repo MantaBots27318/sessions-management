@@ -15,15 +15,17 @@ from json import dumps, loads
 from requests import Response
 from copy import deepcopy
 
-class MicrosoftAPI:
+class MicrosoftMockAPI:
     """ A mock class to simulate requests to microsoft API """
 
     s_TestCalendar = "Test Calendar"
 
     def __init__(self, scenario):
+        """ Initialize API from scenario data"""
         self.__scenario = deepcopy(scenario)
 
     def get(self, endpoint, headers={}, params={}) :
+        """ requests.get mocking """
 
         response = MockMicrosoftResponse()
         if endpoint == 'https://graph.microsoft.com/v1.0/me' :
@@ -98,7 +100,7 @@ class MicrosoftAPI:
 
         # If the calendar is the Test Calendar, list its events from the scenario data
 
-        if calendar['name'] == MicrosoftAPI.s_TestCalendar :
+        if calendar['name'] == MicrosoftMockAPI.s_TestCalendar :
             for event in self.__scenario['events'] :
                 item = {}
 
@@ -147,6 +149,7 @@ class MicrosoftAPI:
             item['jobTitle'] = contact['role']
             item['emailAddresses'] = [{'address' : contact['mail']}]
             item['displayName'] = contact['name']
+            item['categories'] = contact['tags']
             result.append(item)
 
         return result

@@ -36,6 +36,7 @@ This python scripts performs the following steps :
    - Which are due to happen in the next N days
    - Whose Summary contains a given topic
    - Which have not been registered yet, or whose registration date have changed ( see below )
+   - Whose registration date has not changed, but who have additional attendees
 
 2) Select the name of the attendees from a contact list using Microsoft Graph API:
 

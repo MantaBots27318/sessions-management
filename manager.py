@@ -191,11 +191,13 @@ class Registration:
 
                 # Retrieve the dates for which event has already been registered
                 last_reg = self.__get_registration_status(event['id'],self.__token)
+                self.__logger.debug('Previous registration data : %s',str(last_reg))
 
                 # Compute the timeslot for which the event shall be registered
                 dates = self.__compute_registration_timeslot(
                     event,
                     self.__conf['calendar']['full_day'])
+                self.__logger.debug('Current dates : %s',str(dates))
 
                 # Compute the difference between the current registration state, and the new ones
                 delta_start = timedelta(days=1)
@@ -203,13 +205,15 @@ class Registration:
                 if 'start' in last_reg : delta_start = last_reg['start'] - dates['start']
                 if 'end' in last_reg : delta_end = dates['end'] - last_reg['end']
 
-                # Get names of students, coaches and mentors attending the event
+                self.__logger.debug('Delta start : %s / Delta end : %s',str(delta_start), str(delta_end))
+
+                # Get names of students and adults mentors attending the event
                 # Compare it with the last registration to get the new attendees
                 attendees_list = self.__get_attendees(event, self.__contacts)
                 attendees = { 'all' : attendees_list, 'new' : attendees_list}
 
-                if 'students' in last_reg and 'coaches' in last_reg :
-                    attendees['new'] = {'students' : [], 'coaches' : [], 'mentors': []}
+                if 'students' in last_reg and 'adults' in last_reg :
+                    attendees['new'] = {'students' : [], 'adults' : []}
                     for role in attendees['all'] :
                         for new in attendees['all'][role] :
                             found = False
@@ -218,23 +222,24 @@ class Registration:
                                     if new['emailAddresses'][0]['address'] == old['emailAddresses'][0]['address'] :
                                         found = True
                             if not found : attendees['new'][role].append(new)
+                self.__logger.debug('Current attendees : %s',str(attendees))
 
                 # Check if event shall be registered, using its status and its subject
                 # And only if there are people attending
                 topic = self.__conf['calendar']['topic']
                 if  'isCancelled' in event and not event['isCancelled'] and \
                     'subject' in event and topic in event['subject'] and \
-                    len(attendees['all']['students']) + len(attendees['all']['coaches']) != 0 :
+                    len(attendees['all']['students']) + len(attendees['all']['adults']) != 0 :
 
                     # Check if the event was already registered but dates have changed or
                     # if it has never been registered, in which case all the students
-                    # and coaches shall be registered
+                    # and adults shall be registered
                     if delta_start.total_seconds() > 0 or delta_end.total_seconds() > 0 :
                         attendees['new'] = attendees['all']
                         self.__events.append({'raw' : event, 'dates' : dates, 'attendees' : attendees})
                     # Check if the event was already registered at the correct time
                     # but attendees have changed, in this case only new attendees should be registered
-                    elif len(attendees['new']['students']) != 0 or len(attendees['new']['coaches']) != 0 :
+                    elif len(attendees['new']['students']) != 0 or len(attendees['new']['adults']) != 0 :
                         self.__events.append({'raw' : event, 'dates' : dates, 'attendees' : attendees})
 
         except Exception as e:
@@ -270,15 +275,13 @@ class Registration:
                 'event_id': event['raw']['id'],
                 'start_time': start.strftime('%A, %d. %B %Y at %I:%M%p'),
                 'end_time': end.strftime('%A, %d. %B %Y at %I:%M%p'),
-                'date': event['dates']['start'].strftime('%A, %d. %B %Y')
+                'date': start.strftime('%A, %d. %B %Y')
             }
 
             data['adults'] = \
-                '\n'.join(f"- {c['displayName']}" for c in event['attendees']['new']['coaches'])
+                '\n'.join(f"- {c['displayName']}" for c in event['attendees']['new']['adults'])
             data['students'] = \
                 '\n'.join(f"- {s['displayName']}" for s in event['attendees']['new']['students'])
-            data['mentors'] = \
-                '\n'.join(f"- {m['displayName']}" for m in event['attendees']['new']['mentors'])
 
             # Replace placeholders in the template
             email = template
@@ -522,10 +525,10 @@ class Registration:
                 if is_full_day :
                     local = ZoneInfo(self.__conf['calendar']['time_zone'])
                     result['start'] = result['start'].astimezone(local)
-                    result['start'] = result['start'].replace(hour=0, minute=0, second=0)
+                    result['start'] = result['start'].replace(hour=0, minute=0, second=0, microsecond=0)
                     result['start'] = result['start'].astimezone(utc)
                     result['end'] = result['end'].astimezone(local)
-                    result['end'] = result['end'].replace(hour=23, minute=59, second=59)
+                    result['end'] = result['end'].replace(hour=23, minute=59, second=59, microsecond=0)
                     result['end'] = result['end'].astimezone(utc)
 
 
@@ -552,13 +555,12 @@ class Registration:
             extension = loads(response.content.decode('utf-8'))
 
             if 'sent' in extension and extension['sent']:
-                result['start'] = datetime.strptime(extension['start'],'%Y-%m-%dT%H:%M:%S%z')
-                result['end'] = datetime.strptime(extension['end'],'%Y-%m-%dT%H:%M:%S%z')
+                result['start'] = datetime.strptime(extension['start'],'%Y-%m-%dT%H:%M:%S.%f%z')
+                result['end'] = datetime.strptime(extension['end'],'%Y-%m-%dT%H:%M:%S.%f%z')
                 result['start'].replace(tzinfo=timezone.utc)
                 result['end'].replace(tzinfo=timezone.utc)
                 result['students'] = extension['students']
-                result['coaches'] = extension['coaches']
-                result['mentors'] = extension['mentors']
+                result['adults'] = extension['adults']
 
         return result
 
@@ -569,11 +571,11 @@ class Registration:
         Parameters     :
             event (dict)    : Event to analyze for attendees
             contacts (dict) : List of contacts to look for attendees
-        Returns (dict) : The list of students, mentors and coaches to register
+        Returns (dict) : The list of students and adults to register
         Throws         :
         """
 
-        result = {'students': [], 'coaches': [], 'mentors': []}
+        result = {'students': [], 'adults': []}
         self.__logger.info('--> Getting attendees names from contacts list')
 
         if 'attendees' in event:
@@ -584,20 +586,22 @@ class Registration:
                         for mail in contact['emailAddresses']:
                             if mail['address'] == attendee['emailAddress']['address'] :
 
-                                # Append to list from job title
-                                title = contact['jobTitle']
-                                if title == 'Team Member':
-                                    result['students'].append(contact)
-                                elif title == 'Coach':
-                                    result['coaches'].append(contact)
-                                elif title == 'Mentor':
-                                    result['mentors'].append(contact)
+                                # Append to list from categories
+                                has_been_added = False
+                                for category in contact['categories']:
+                                    if category.lower() == 'student' :
+                                        result['students'].append(contact)
+                                        has_been_added = True
+                                    elif category.lower() == 'adult':
+                                        result['adults'].append(contact)
+                                        has_been_added = True
+                                if not has_been_added :
+                                    self.__logger.warning('Contact %s not marked as student or adult', contact['displayName'])
 
             self.__logger.info(
-                "---> Found %d coaches %d students and %d mentors for event %s",
-                len(result['coaches']),
+                "---> Found %d adults and %d students for event %s",
+                len(result['adults']),
                 len(result['students']),
-                len(result['mentors']),
                 event.get('subject', 'No Subject')
             )
 
@@ -709,7 +713,7 @@ class Registration:
             identifier (str) : Identifier of the event to update
             token (str)      : Access token for the Microsoft Graph API
             dates (dict)     : Start and end date of the registration
-            attendees (dict) : Lists of students, mentors and coaches
+            attendees (dict) : Lists of students and adults
         Returns        : Nothing
         Throws         : Exception if the update fails
         """
@@ -722,11 +726,10 @@ class Registration:
             "@odata.type": "microsoft.graph.openTypeExtension",
             "extensionName": "org.mantabots",
             'sent'     : True,
-            'start'    : dates['start'].astimezone(tz).strftime('%Y-%m-%dT%H:%M:%S%z'),
-            'end'      : dates['end'].astimezone(tz).strftime('%Y-%m-%dT%H:%M:%S%z'),
+            'start'    : dates['start'].astimezone(tz).strftime('%Y-%m-%dT%H:%M:%S.%f%z'),
+            'end'      : dates['end'].astimezone(tz).strftime('%Y-%m-%dT%H:%M:%S.%f%z'),
             'students' : attendees['students'],
-            'coaches'  : attendees['coaches'],
-            'mentors'  : attendees['mentors']
+            'adults'  : attendees['adults']
         }
         response = self.__post(endpoint, headers=headers, json=custom_properties)
 

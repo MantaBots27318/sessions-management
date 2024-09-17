@@ -27,55 +27,33 @@ ROBOT = False
 from manager                 import Registration
 
 # Local includes
-from microsoft               import MicrosoftAPI
+from microsoft               import MicrosoftMockAPI
 from smtpmock                import MockSMTPServer
 from imapmock                import MockImapServer
-from tools                   import Tools
-
-
-# Scenarii configuration settings
-scenarii_path = path.normpath(path.join(path.dirname(__file__), '../data/scenarii.json'))
-
-# Results data
-results_path = path.normpath(path.join(path.dirname(__file__), '../data/results.json'))
-
-# Input data
-data_path = path.normpath(path.join(path.dirname(__file__), '../data/data.json'))
+from parser                  import Parser
+from comparer                import Comparer
 
 # Logger configuration settings
 logg_conf_path = path.normpath(path.join(path.dirname(__file__), '../../conf/logging.conf'))
 
+now = datetime.now(timezone.utc)
 
-@keyword('Build Scenario Data')
-def build_scenario_data(scenario) :
+@keyword('Load Scenario Data')
+def load_scenario_data(identifier, conf) :
+    """ Load test data and test configuration"""
 
     result = {}
 
     # Load scenario data
-    with open(scenarii_path, encoding="utf-8") as file: scenarii = load(file)
-    # Load input data
-    with open(data_path, encoding="utf-8") as file: data = load(file)
-    # Load scenario results
-    with open(results_path, encoding="utf-8") as file: results = load(file)
-
-    if not scenario in scenarii : raise Exception('Scenario not found')
-    if not scenario in results : raise Exception('Scenario not found')
-
-    result['data'] = data[scenarii[scenario]['data']]
-    result['conf'] = scenarii[scenario]['conf']
-    result['results'] = results[scenario]
-
-    # Read timezone from configuration file
-    app_conf_path = path.normpath(path.join(path.dirname(__file__), '../../', result['conf']))
-    result['timezone'] = Tools.read_timezone(app_conf_path)
+    result = Parser.read_scenario(identifier, conf)
 
     # Format events timestamp info into datetime objects
     for event in result['data']['events'] :
 
         event['start'] = {}
         event['end'] = {}
-        start = datetime.now(result['timezone']) + timedelta(hours=event['delta_start_hours'])
-        end = datetime.now(result['timezone']) + timedelta(hours=event['delta_end_hours'])
+        start = now.astimezone(result['timezone']) + timedelta(hours=event['delta_start_hours'])
+        end = now.astimezone(result['timezone']) + timedelta(hours=event['delta_end_hours'])
 
         # If event lasts one or more full days, set its start time to 00:00:00
         # and its end time to 00:00:00 of the next day. Remove one second to
@@ -90,11 +68,23 @@ def build_scenario_data(scenario) :
 
     return result
 
+
+@keyword('Load Results')
+def load_results(identifier, conf) :
+    """ Load test results """
+
+    result = {}
+
+    # Load scenario data
+    result = Parser.read_results(identifier, conf)
+
+    return result
+
 @keyword('Run Registration Workflow with Mocks')
 def run_registration_workflow_with_mocks(scenario, receiver, sender) :
 
     result = {
-        'microsoft' : MicrosoftAPI(scenario['data']),
+        'microsoft' : MicrosoftMockAPI(scenario['data']),
         'smtp' : MockSMTPServer(scenario['data']['smtp']),
         'imap' : MockImapServer(scenario['data']['imap'])
     }
@@ -116,83 +106,56 @@ def run_registration_workflow_with_mocks(scenario, receiver, sender) :
     return result
 
 @keyword('Check Final State')
-def check_final_state(scenario, results) :
+def check_final_state(reference, results) :
 
     mails = results['smtp'].get_mails()
     events = results['microsoft'].scenario()['events']
 
-    if len(mails) != len(scenario['results']['mails']) :
-        raise Exception('Different number of emails sent')
+    Comparer.compare_emails_number(reference,results)
 
     for mail in mails :
 
-        mail_found = False
-        for test in scenario['results']['mails'] :
+        logger.debug(mail['subject'])
 
-            # Get associated event id
-            event_id = mail['subject'][\
-                mail['subject'].find('[') + 1:\
-                mail['subject'].find(']')]
+        # Get associated event id
+        event_id = mail['subject'][\
+            mail['subject'].find('[') + 1:\
+            mail['subject'].find(']')]
 
-            found = False
-            local_test = {'subject' : '', 'content' : ''}
-            for event in events :
-                if event['id'] == event_id :
-                    found = True
+        # Get associated event
+        associated_event = {}
+        found = False
+        for event in events :
+            if event['id'] == event_id :
+                found = True
+                associated_event = event
 
-                    tz = ZoneInfo('UTC')
-                    start_date = event['start']['date']
-                    end_date = event['end']['date']
-                    if event['full_day'] == 'true' : end_date = end_date + timedelta(seconds=-1)
-                    elif scenario['results']['full'] == 'true' and event['full_day'] != 'true':
-                        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
-                        end_date = end_date + timedelta(seconds=-1)
-                        end_date = end_date.replace(hour=23, minute=59, second=59, microsecond=0)
-                    start_date = start_date.astimezone(tz)
-                    end_date = end_date.astimezone(tz)
-                    start_date_utc   = start_date.strftime('%Y-%m-%dT%H:%M:%S%z')
-                    end_date_utc     = end_date.strftime('%Y-%m-%dT%H:%M:%S%z')
-                    start_date_local = start_date.astimezone(scenario['timezone'])
-                    end_date_local   = end_date.astimezone(scenario['timezone'])
+        if not found : raise Exception('Event id ' + event_id + ' not found')
+        logger.debug(f'Event {event_id} found')
 
-                    local_test['subject'] = test['subject'].replace('{{start_date}}',start_date_local.strftime('%A, %d. %B %Y'))
-                    local_test['subject'] = local_test['subject'].replace('{{end_date}}',end_date_local.strftime('%A, %d. %B %Y'))
-                    local_test['content'] = test['content'].replace('{{start_date}}',start_date_local.strftime('%A, %d. %B %Y'))
-                    local_test['content'] = local_test['content'].replace('{{end_date}}',end_date_local.strftime('%A, %d. %B %Y'))
+        found = False
+        for test in reference['data']['mails'] :
 
-                    local_test['subject'] = local_test['subject'].replace('{{start_time}}',start_date_local.strftime('%I:%M%p'))
-                    local_test['subject'] = local_test['subject'].replace('{{end_time}}',end_date_local.strftime('%I:%M%p'))
-                    local_test['content'] = local_test['content'].replace('{{start_time}}',start_date_local.strftime('%I:%M%p'))
-                    local_test['content'] = local_test['content'].replace('{{end_time}}',end_date_local.strftime('%I:%M%p'))
+            reference_id = test['subject'][\
+                test['subject'].find('[') + 1:\
+                test['subject'].find(']')]
 
-                    logger.debug(event)
+            if reference_id == event_id :
+                found = True
+                actual = {'mail' : mail, 'event' : associated_event}
 
-                    if not 'registration' in event : raise Exception('Event not updated after email sent')
-                    if not 'sent' in event['registration'] : raise Exception('Event not updated after email sent')
-                    if not 'start' in event['registration'] : raise Exception('Event not updated after email sent')
-                    if not 'end' in event['registration'] : raise Exception('Event not updated after email sent')
-                    if not 'students' in event['registration'] : raise Exception('Event not updated after email sent')
-                    if not 'coaches' in event['registration'] : raise Exception('Event not updated after email sent')
+                Comparer.compare_email(
+                    test, actual, reference['timezone'], reference['data']['full'])
+                Comparer.compare_registration(
+                    test, actual, reference['timezone'], reference['data']['full'])
 
-                    if not event['registration']['sent'] : raise Exception('Event sent status is not true')
-                    if event['registration']['start'] != start_date_utc : raise Exception('Start date does not match email')
-                    if event['registration']['end'] != end_date_utc : raise Exception('End date does not match email')
-
-
-            if not found : raise Exception('Event id ' + event_id + ' not found')
-
-            if test['from'] == mail['from'] and \
-               test['to'] == mail['to'] and \
-               local_test['subject'] == mail['subject'] and \
-               local_test['content'] == mail['content'] :
-               mail_found = True
-
-        if not mail_found : raise Exception('No matching email found')
+        if not found : raise Exception('Event id ' + event_id + ' not found')
 
 @keyword('Update Scenario Data From Results')
 def update_scenario_data_from_results(scenario, results) :
 
     scenario['data']['events'] = results['microsoft'].scenario()['events']
+    logger.debug(scenario)
 
     return scenario
 

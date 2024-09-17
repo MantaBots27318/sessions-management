@@ -1,14 +1,8 @@
 {
     "1" : {
         "calendars" : [
-            {
-                "id": "calendar1",
-                "name": "2024-2025 IntoTheDeep Team Calendar"
-            },
-            {
-                "id": "calendar2",
-                "name": "Test Calendar"
-            }
+            { "id": "calendar1", "name": "2024-2025 IntoTheDeep Team Calendar" },
+            { "id": "calendar2", "name": "Test Calendar" }
         ],
         "events" : [
             {
@@ -18,34 +12,17 @@
                 "delta_start_hours" : 0,
                 "delta_end_hours" : 24,
                 "status": "confirmed",
-                "attendees": [
-                    {"mail": "moi@moi.fr"},
-                    {"mail": "coach@example.com"}
-                ]
+                "attendees": [ {"mail": "moi@moi.fr"}, {"mail": "coach@example.com"} ]
             }
         ],
-        "contacts": [
-            {
-                "role" : "Team Member",
-                "mail" : "moi@moi.fr",
-                "name" : "Moi"
-            }
-        ],
-        "smtp" : {
-        },
-        "imap" : {
-        }
+        "contacts": [ { "role" : "Team Member", "mail" : "moi@moi.fr", "name" : "Moi", "tags" : ["Student"] } ],
+        "smtp" : {},
+        "imap" : {}
     },
     "2" : {
         "calendars" : [
-            {
-                "id": "calendar1",
-                "name": "2024-2025 IntoTheDeep Team Calendar"
-            },
-            {
-                "id": "calendar2",
-                "name": "Test Calendar"
-            }
+            { "id": "calendar1", "name": "2024-2025 IntoTheDeep Team Calendar" },
+            { "id": "calendar2", "name": "Test Calendar" }
         ],
         "events" : [
             {
@@ -55,34 +32,17 @@
                 "delta_start_hours" : 0,
                 "delta_end_hours" : 24,
                 "status": "confirmed",
-                "attendees": [
-                    {"mail": "moi@moi.fr"},
-                    {"mail": "coach@example.com"}
-                ]
+                "attendees": [ {"mail": "moi@moi.fr"}, {"mail": "coach@example.com"} ]
             }
         ],
-        "contacts": [
-            {
-                "role" : "Team Member",
-                "mail" : "moi@moi.fr",
-                "name" : "Moi"
-            }
-        ],
-        "smtp" : {
-        },
-        "imap" : {
-        }
+        "contacts": [ { "role" : "Team Member", "mail" : "moi@moi.fr", "name" : "Moi", "tags" : ["Student"] } ],
+        "smtp" : {},
+        "imap" : {}
     },
     "3" : {
-        "calendars" :[
-            {
-                "id": "calendar1",
-                "name": "2024-2025 IntoTheDeep Team Calendar"
-            },
-            {
-                "id": "calendar2",
-                "name": "Test Calendar"
-            }
+        "calendars" : [
+            { "id": "calendar1", "name": "2024-2025 IntoTheDeep Team Calendar" },
+            { "id": "calendar2", "name": "Test Calendar" }
         ],
         "events" : [
             {
@@ -93,9 +53,9 @@
                 "delta_end_hours" : 24,
                 "status": "confirmed",
                 "attendees": [
-                    {"mail": "student1@example.com"},
-                    {"mail": "student2@example.com"},
-                    {"mail": "student3@example.com"},
+                    {"mail": "Student1@example.com"},
+                    {"mail": "Student2@example.com"},
+                    {"mail": "Student3@example.com"},
                     {"mail": "coach1@example.com"},
                     {"mail": "coach2@example.com"},
                     {"mail": "coach3@example.com"}
@@ -103,42 +63,18 @@
             }
         ],
         "contacts": [
-            {
-                "role" : "Team Member",
-                "mail"  : "student1@example.com",
-                "name"  : "Student 1"
-            },
-            {
-                "role" : "Mentor",
-                "mail"  : "student3@example.com",
-                "name"  : "Student 3"
-            },
-            {
-                "role" : "Mentor",
-                "mail"  : "coach1@example.com",
-                "name"  : "Coach 1"
-            },
-            {
-                "role" : "Coach",
-                "mail" : "coach2@example.com",
-                "name" : "Coach 2"
-            }
+            { "role" : "Team Member", "mail"  : "Student1@example.com", "name"  : "Student 1", "tags" : ["Student"] },
+            { "role" : "Mentor", "mail"  : "Student3@example.com", "name"  : "Student 3", "tags" : ["Student"]},
+            { "role" : "Mentor", "mail"  : "coach1@example.com", "name"  : "Coach 1", "tags" : [] },
+            { "role" : "Coach", "mail" : "coach2@example.com", "name" : "Coach 2", "tags" : ["Adult"] }
         ],
-        "smtp" : {
-        },
-        "imap" : {
-        }
+        "smtp" : {},
+        "imap" : {}
     },
     "4" : {
-        "calendars" :[
-            {
-                "id": "calendar1",
-                "name": "2024-2025 IntoTheDeep Team Calendar"
-            },
-            {
-                "id": "calendar2",
-                "name": "Test Calendar"
-            }
+        "calendars" : [
+            { "id": "calendar1", "name": "2024-2025 IntoTheDeep Team Calendar" },
+            { "id": "calendar2", "name": "Test Calendar" }
         ],
         "events" : [
             {
@@ -206,7 +142,7 @@
             {
                 "role" : "Team Member",
                 "mail" : "moi@moi.fr",
-                "name" : "Moi"
+                "name" : "Moi", "tags" : ["Student"]
             }
         ],
         "smtp" : {
@@ -215,15 +151,9 @@
         }
     },
     "5" : {
-        "calendars" :[
-            {
-                "id": "calendar1",
-                "name": "2024-2025 IntoTheDeep Team Calendar"
-            },
-            {
-                "id": "calendar2",
-                "name": "Test Calendar"
-            }
+        "calendars" : [
+            { "id": "calendar1", "name": "2024-2025 IntoTheDeep Team Calendar" },
+            { "id": "calendar2", "name": "Test Calendar" }
         ],
         "events" : [
             {
@@ -291,12 +221,12 @@
             {
                 "role" : "Team Member",
                 "mail" : "moi@moi.fr",
-                "name" : "Moi"
+                "name" : "Moi", "tags" : ["Student"]
             },
             {
                 "role" : "Coach",
                 "mail" : "coach2@example.com",
-                "name" : "Coach 2"
+                "name" : "Coach 2", "tags" : ["Adult"]
             }
         ],
         "smtp" : {
@@ -305,15 +235,9 @@
         }
     },
     "6" : {
-        "calendars" :[
-            {
-                "id": "calendar1",
-                "name": "2024-2025 IntoTheDeep Team Calendar"
-            },
-            {
-                "id": "calendar2",
-                "name": "Test Calendar"
-            }
+        "calendars" : [
+            { "id": "calendar1", "name": "2024-2025 IntoTheDeep Team Calendar" },
+            { "id": "calendar2", "name": "Test Calendar" }
         ],
         "events" : [
             {
@@ -402,16 +326,8 @@
             }
         ],
         "contacts": [
-            {
-                "role" : "Team Member",
-                "mail" : "moi@moi.fr",
-                "name" : "Moi"
-            },
-            {
-                "role" : "Coach",
-                "mail" : "coach2@example.com",
-                "names" : "Coach 2"
-            }
+            { "role" : "Team Member", "mail" : "moi@moi.fr", "name" : "Moi", "tags" : ["Student"] },
+            { "role" : "Coach", "mail" : "coach2@example.com", "names" : "Coach 2", "tags" : ["Adult"] }
         ],
         "smtp" : {
         },
@@ -419,15 +335,9 @@
         }
     },
     "7" : {
-        "calendars" :[
-            {
-                "id": "calendar1",
-                "name": "2024-2025 IntoTheDeep Team Calendar"
-            },
-            {
-                "id": "calendar2",
-                "name": "Test Calendar"
-            }
+        "calendars" : [
+            { "id": "calendar1", "name": "2024-2025 IntoTheDeep Team Calendar" },
+            { "id": "calendar2", "name": "Test Calendar" }
         ],
         "events" : [
             {
@@ -437,10 +347,7 @@
                 "delta_start_hours" : 0,
                 "delta_end_hours" : 24,
                 "status": "confirmed",
-                "attendees": [
-                    {"mail": "moi@moi.fr"},
-                    {"mail": "coach@example.com"}
-                ]
+                "attendees": [ {"mail": "moi@moi.fr"}, {"mail": "coach@example.com"} ]
             },
             {
                 "id": "event2",
@@ -449,22 +356,12 @@
                 "delta_start_hours" : 0,
                 "delta_end_hours" : 24,
                 "status": "confirmed",
-                "attendees": [
-                    {"mail": "moi@moi.fr"},
-                    {"mail": "coach@example.com"}
-                ]
+                "attendees": [ {"mail": "moi@moi.fr"}, {"mail": "coach@example.com"} ]
             }
         ],
-        "contacts": [
-            {
-                "role" : "Team Member",
-                "mail" : "moi@moi.fr",
-                "name" : "Moi"
-            }
+        "contacts": [ { "role" : "Team Member", "mail" : "moi@moi.fr", "name" : "Moi", "tags" : ["Student"] }
         ],
-        "smtp" : {
-        },
-        "imap" : {
-        }
+        "smtp" : {},
+        "imap" : {}
     }
 }
