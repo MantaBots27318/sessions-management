@@ -39,7 +39,11 @@ python3 -m robot --variable data:$scriptpath/../test/data/                  \
                  $args                                                      \
                  $scriptpath/../test/cases
 
+status=$?
 
 # Deactivate virtual environment
 deactivate
 rm -Rf /tmp/test/
+
+# Exit with status
+exit $status

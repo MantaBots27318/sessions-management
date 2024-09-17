@@ -15,14 +15,17 @@ from json import dumps, loads
 from requests import Response
 from copy import deepcopy
 
-class MockMicrosoftLibrary:
+class MicrosoftMockAPI:
     """ A mock class to simulate requests to microsoft API """
 
+    s_TestCalendar = "Test Calendar"
+
     def __init__(self, scenario):
+        """ Initialize API from scenario data"""
         self.__scenario = deepcopy(scenario)
-        self.__services = {}
 
     def get(self, endpoint, headers={}, params={}) :
+        """ requests.get mocking """
 
         response = MockMicrosoftResponse()
         if endpoint == 'https://graph.microsoft.com/v1.0/me' :
@@ -31,7 +34,7 @@ class MockMicrosoftLibrary:
 
         elif endpoint == 'https://graph.microsoft.com/v1.0/me/contacts' :
             try :
-                response.set_content({'value' : self.__list_contacts()})
+                response.set_content({'value' : self.__format_contacts()})
                 response.status_code  = 200
             except Exception as e :
                 response.status_code  = 404
@@ -45,7 +48,7 @@ class MockMicrosoftLibrary:
             try :
                 id = endpoint.split('/')[-2]
                 response.set_content({
-                    'value' : self.__list_events(id, params['startDateTime'],params['endDateTime'])
+                    'value' : self.__format_events(id, params['startDateTime'],params['endDateTime'])
                 })
                 response.status_code  = 200
             except Exception as e :
@@ -57,7 +60,7 @@ class MockMicrosoftLibrary:
                 id = endpoint.split('/')[-3]
                 extension = endpoint.split('/')[-1]
                 response.set_content(
-                    self.__list_extensions(id, extension))
+                    self.__format_extensions(id, extension))
                 response.status_code  = 200
             except Exception as e :
                 response.status_code  = 404
@@ -83,97 +86,99 @@ class MockMicrosoftLibrary:
 
         return response
 
-    def __list_events(self, id, timeMin, timeMax):
+    def __format_events(self, identifier, timeMin, timeMax):
 
         result = []
 
+        # Check that the required calendar exists
         found = False
         for calendar in self.__scenario['calendars'] :
-            if calendar['id'] == id :
+            if calendar['id'] == identifier :
                 found = True
                 calendar = calendar
-
         if not found : raise Exception('Calendar %s not found', id)
 
-        if calendar['name'] == 'Test Calendar' :
-            for item in self.__scenario['items'] :
-                temp = deepcopy(item)
-                temp['isCancelled'] = not(temp['status'] == 'confirmed')
-                temp['subject'] = temp['summary']
+        # If the calendar is the Test Calendar, list its events from the scenario data
 
-                for i_attendee, attendee in enumerate(temp['attendees']) :
-                    temp['attendees'][i_attendee]['emailAddress'] = {
-                        'address':  temp['attendees'][i_attendee]['email']
-                    }
+        if calendar['name'] == MicrosoftMockAPI.s_TestCalendar :
+            for event in self.__scenario['events'] :
+                item = {}
 
-                if temp['full_day'] == 'true': temp['isAllDay'] = True
-                else : temp['isAllDay'] = False
+                # Format the event into Microsoft Graph API format
+                item['isCancelled'] = not(event['status'] == 'confirmed')
+                item['subject'] = event['summary']
+                item['id'] = event['id']
+
+                if event['full_day'] == 'true': item['isAllDay'] = True
+                else : item['isAllDay'] = False
+
+                item['attendees'] = []
+                for attendee in event['attendees'] :
+                    item['attendees'].append({
+                        'emailAddress' :  {'address':  attendee['mail']}
+                    })
 
                 utc = ZoneInfo('UTC')
-                start = temp['start']['date'].astimezone(utc)
-                end = temp['end']['date'].astimezone(utc)
-                temp['start']['dateTime'] = start.strftime('%Y-%m-%dT%H:%M:%S.%f') + '0'
-                temp['end']['dateTime'] = end.strftime('%Y-%m-%dT%H:%M:%S.%f') + '0'
-                temp['start']['timeZone'] = 'UTC'
-                temp['end']['timeZone'] = 'UTC'
-                del temp['start']['date']
-                del temp['end']['date']
+                item['start'] = {}
+                item['end'] = {}
+                start = event['start']['date'].astimezone(utc)
+                end = event['end']['date'].astimezone(utc)
+                item['start']['dateTime'] = start.strftime('%Y-%m-%dT%H:%M:%S.%f') + '0'
+                item['end']['dateTime'] = end.strftime('%Y-%m-%dT%H:%M:%S.%f') + '0'
+                item['start']['timeZone'] = 'UTC'
+                item['end']['timeZone'] = 'UTC'
 
                 if end.timestamp()  >= datetime.fromisoformat(timeMin).timestamp()  and \
-                start.timestamp()  < datetime.fromisoformat(timeMax).timestamp()  :
-                    if temp['full_day'] == 'true':
+                   start.timestamp()  < datetime.fromisoformat(timeMax).timestamp()  :
+                    if event['full_day'] == 'true':
                         # Mock the error microsoft does on full event, not taking into account the creation timezone
                         start = start.replace(hour=0, minute=0, second=0, microsecond=0)
                         end = end.replace(hour=0, minute=0, second=0, microsecond=0)
-                        temp['start']['dateTime'] = start.strftime('%Y-%m-%dT%H:%M:%S.%f') + '0'
-                        temp['end']['dateTime'] = end.strftime('%Y-%m-%dT%H:%M:%S.%f') + '0'
-                    result.append(temp)
+                        item['start']['dateTime'] = start.strftime('%Y-%m-%dT%H:%M:%S.%f') + '0'
+                        item['end']['dateTime'] = end.strftime('%Y-%m-%dT%H:%M:%S.%f') + '0'
+                    result.append(item)
 
         return result
 
-    def __list_contacts(self):
+    def __format_contacts(self):
 
         result = []
 
-        for item in self.__scenario['connections'] :
-            temp = deepcopy(item)
-            temp['jobTitle'] = temp['organizations'][0]['title']
-            for i_address,address in enumerate(item['emailAddresses']) :
-                temp['emailAddresses'][i_address]['address'] = \
-                    temp['emailAddresses'][i_address]['value']
-            if 'names' in temp :
-                temp['displayName'] = temp['names'][0]['displayName']
-            result.append(temp)
+        for contact in self.__scenario['contacts'] :
+            item = {}
+            item['jobTitle'] = contact['role']
+            item['emailAddresses'] = [{'address' : contact['mail']}]
+            item['displayName'] = contact['name']
+            item['categories'] = contact['tags']
+            result.append(item)
 
         return result
 
-    def __list_extensions(self, id, extension):
+    def __format_extensions(self, identifier, extension):
 
         result = {}
         found = False
 
         if extension == 'org.mantabots' :
-            for item in self.__scenario['items'] :
-                temp = deepcopy(item)
-                if temp['id'] == id :
+            for event in self.__scenario['events'] :
+                if event['id'] == identifier :
                     found = True
-                    if 'extendedProperties' in temp and 'private' in temp['extendedProperties'] :
-                        result = temp['extendedProperties']['private']
+                    if 'registration' in event :
+                        result = event['registration']
 
         if not found :
             raise Exception('Event %s not found', id)
 
         return result
 
-    def __update_extensions(self, id, data):
-
+    def __update_extensions(self, identifier, data):
 
         if 'extensionName' in data and data['extensionName'] == 'org.mantabots' :
             found = False
-            for i_item, item in enumerate(self.__scenario['items']) :
-                if item['id'] == id :
+            for event in self.__scenario['events'] :
+                if event['id'] == identifier :
                     found = True
-                    self.__scenario['items'][i_item]['extendedProperties'] = {'private' : data}
+                    event['registration'] = data
 
             if not found :
                 raise Exception('Event %s not found', id)

@@ -15,6 +15,7 @@ from json      import load
 from datetime  import datetime, timedelta, timezone
 from zoneinfo  import ZoneInfo
 from logging   import config, getLogger
+from copy      import deepcopy
 relpath.append(path.relpath("../../"))
 
 # Robotframework includes
@@ -27,65 +28,56 @@ ROBOT = False
 from manager                 import Registration
 
 # Local includes
-from microsoftmock           import MockMicrosoftLibrary
+from microsoft               import MicrosoftMockAPI
 from smtpmock                import MockSMTPServer
 from imapmock                import MockImapServer
-
-
-# Scenarii configuration settings
-scenarii_path = path.normpath(path.join(path.dirname(__file__), '../data/scenarii.json'))
-
-# Results data
-results_path = path.normpath(path.join(path.dirname(__file__), '../data/results.json'))
-
-# Input data
-data_path = path.normpath(path.join(path.dirname(__file__), '../data/data.json'))
+from parser                  import Parser
+from comparer                import Comparer
 
 # Logger configuration settings
 logg_conf_path = path.normpath(path.join(path.dirname(__file__), '../../conf/logging.conf'))
 
+now = datetime.now(timezone.utc)
 
-@keyword('Build Scenario Data')
-def build_scenario_data(scenario) :
+@keyword('Load Scenario Data')
+def load_scenario_data(identifier, conf) :
+    """ Load test data and test configuration"""
 
     result = {}
 
     # Load scenario data
-    with open(scenarii_path, encoding="utf-8") as file: scenarii = load(file)
-    # Load input data
-    with open(data_path, encoding="utf-8") as file: data = load(file)
-    # Load scenario results
-    with open(results_path, encoding="utf-8") as file: results = load(file)
+    result = Parser.read_scenario(identifier, conf)
 
-    if not scenario in scenarii : raise Exception('Scenario not found')
-    if not scenario in results : raise Exception('Scenario not found')
+    # Format events timestamp info into datetime objects
+    for event in result['data']['events'] :
 
-    result['data'] = data[scenarii[scenario]['data']]
-    result['conf'] = scenarii[scenario]['conf']
-    result['results'] = results[scenario]
+        event['start'] = {}
+        event['end'] = {}
+        start = now.astimezone(result['timezone']) + timedelta(hours=event['delta_start_hours'])
+        end = now.astimezone(result['timezone']) + timedelta(hours=event['delta_end_hours'])
 
-    app_conf_path = path.normpath(path.join(path.dirname(__file__), '../../', result['conf']))
-    with open(app_conf_path, encoding="utf-8") as file:
-        temp_conf = load(file)
-        if 'calendar' in temp_conf and \
-            'time_zone' in temp_conf['calendar'] :
-            result['timezone'] = temp_conf['calendar']['time_zone']
-
-    # Format datetime data
-    for i_item, item in enumerate(result['data']['google']['items']) :
-
-        result['data']['google']['items'][i_item]['start'] = {}
-        result['data']['google']['items'][i_item]['end'] = {}
-        tz = ZoneInfo(result['timezone'])
-        start = datetime.now(tz) + timedelta(hours=item['delta_start_hours'])
-        end = datetime.now(tz) + timedelta(hours=item['delta_end_hours'])
-
-        if result['data']['google']['items'][i_item]['full_day'] == 'true':
+        # If event lasts one or more full days, set its start time to 00:00:00
+        # and its end time to 00:00:00 of the next day. Remove one second to
+        # handle the case where the event already ends at 00:00:00 of the next day.
+        if event['full_day'] == 'true':
             start = start.replace(hour=0, minute=0, second=0, microsecond=0)
+            end = end + timedelta(seconds=-1)
             end = end.replace(hour=0, minute=0, second=0, microsecond=0)
 
-        result['data']['google']['items'][i_item]['start']['date'] = start
-        result['data']['google']['items'][i_item]['end']['date'] = end
+        event['start']['date'] = start
+        event['end']['date'] = end
+
+    return result
+
+
+@keyword('Load Results')
+def load_results(identifier, conf) :
+    """ Load test results """
+
+    result = {}
+
+    # Load scenario data
+    result = Parser.read_results(identifier, conf)
 
     return result
 
@@ -93,7 +85,7 @@ def build_scenario_data(scenario) :
 def run_registration_workflow_with_mocks(scenario, receiver, sender) :
 
     result = {
-        'microsoft' : MockMicrosoftLibrary(scenario['data']['google']),
+        'microsoft' : MicrosoftMockAPI(scenario['data']),
         'smtp' : MockSMTPServer(scenario['data']['smtp']),
         'imap' : MockImapServer(scenario['data']['imap'])
     }
@@ -109,108 +101,93 @@ def run_registration_workflow_with_mocks(scenario, receiver, sender) :
 
     registration.configure(scenario['conf'], receiver, sender)
     registration.search_events()
-    registration.get_attendees()
     registration.prepare_emails()
     registration.send_emails()
 
     return result
 
 @keyword('Check Final State')
-def check_final_state(scenario, results) :
+def check_final_state(reference, results) :
+
+    print(reference)
 
     mails = results['smtp'].get_mails()
-    events = results['microsoft'].scenario()['items']
+    events = results['microsoft'].scenario()['events']
 
-    if len(mails) != len(scenario['results']['mails']) :
-        raise Exception('Different number of emails sent')
+    Comparer.compare_emails_number(reference,results)
 
     for mail in mails :
 
-        mail_found = False
-        for test in scenario['results']['mails'] :
+        logger.debug(mail['subject'])
 
-            # Get associated event id
-            event_id = mail['subject'][\
-                mail['subject'].find('[') + 1:\
-                mail['subject'].find(']')]
+        # Get associated event id
+        event_id = mail['subject'][\
+            mail['subject'].find('[') + 1:\
+            mail['subject'].find(']')]
 
-            found = False
-            local_test = {'subject' : '', 'content' : ''}
-            for i_event, event in enumerate(events) :
-                if event['id'] == event_id :
-                    found = True
+        # Get associated event
+        associated_event = {}
+        found = False
+        for event in events :
+            if event['id'] == event_id :
+                found = True
+                associated_event = event
 
-                    tz = ZoneInfo('UTC')
-                    start_date = event['start']['date']
-                    end_date = event['end']['date']
-                    if event['full_day'] == 'true' : end_date = end_date + timedelta(seconds=-1)
-                    elif scenario['results']['full'] == 'true' and event['full_day'] != 'true':
-                        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
-                        end_date = end_date + timedelta(seconds=-1)
-                        end_date = end_date.replace(hour=23, minute=59, second=59, microsecond=0)
-                    start_date = start_date.astimezone(tz)
-                    end_date = end_date.astimezone(tz)
-                    start_date_utc   = start_date.strftime('%Y-%m-%dT%H:%M:%S%z')
-                    end_date_utc     = end_date.strftime('%Y-%m-%dT%H:%M:%S%z')
-                    start_date_local = start_date.astimezone(ZoneInfo(scenario['timezone']))
-                    end_date_local   = end_date.astimezone(ZoneInfo(scenario['timezone']))
+        if not found : raise Exception('Event id ' + event_id + ' not found')
+        logger.debug(f'Event {event_id} found')
 
-                    local_test['subject'] = test['subject'].replace('{{start_date}}',start_date_local.strftime('%A, %d. %B %Y'))
-                    local_test['subject'] = local_test['subject'].replace('{{end_date}}',end_date_local.strftime('%A, %d. %B %Y'))
-                    local_test['content'] = test['content'].replace('{{start_date}}',start_date_local.strftime('%A, %d. %B %Y'))
-                    local_test['content'] = local_test['content'].replace('{{end_date}}',end_date_local.strftime('%A, %d. %B %Y'))
+        found = False
+        for test in reference['data']['mails'] :
 
-                    local_test['subject'] = local_test['subject'].replace('{{start_time}}',start_date_local.strftime('%I:%M%p'))
-                    local_test['subject'] = local_test['subject'].replace('{{end_time}}',end_date_local.strftime('%I:%M%p'))
-                    local_test['content'] = local_test['content'].replace('{{start_time}}',start_date_local.strftime('%I:%M%p'))
-                    local_test['content'] = local_test['content'].replace('{{end_time}}',end_date_local.strftime('%I:%M%p'))
+            reference_id = test['subject'][\
+                test['subject'].find('[') + 1:\
+                test['subject'].find(']')]
 
-                    logger.debug(event)
+            if reference_id == event_id :
+                found = True
+                actual = {'mail' : mail, 'event' : associated_event}
 
+                Comparer.compare_email(
+                    test, actual, reference['timezone'], reference['data']['full'])
+                Comparer.compare_registration(
+                    test, actual, reference['timezone'], reference['data']['full'])
 
-                    if not 'extendedProperties' in event : raise Exception('Event not updated after email sent')
-                    if not 'private' in event['extendedProperties'] : raise Exception('Event not updated after email sent')
-                    if not 'sent' in event['extendedProperties']['private'] : raise Exception('Event not updated after email sent')
-                    if not 'start' in event['extendedProperties']['private'] : raise Exception('Event not updated after email sent')
-                    if not 'end' in event['extendedProperties']['private'] : raise Exception('Event not updated after email sent')
-                    if not event['extendedProperties']['private']['sent'] : raise Exception('Event sent status is not true')
-                    if event['extendedProperties']['private']['start'] != start_date_utc : raise Exception('Start date does not match email')
-                    if event['extendedProperties']['private']['end'] != end_date_utc : raise Exception('End date does not match email')
-
-
-            if not found : raise Exception('Event id ' + event_id + ' not found')
-
-            if test['from'] == mail['from'] and \
-               test['to'] == mail['to'] and \
-               local_test['subject'] == mail['subject'] and \
-               local_test['content'] == mail['content'] :
-               mail_found = True
-
-        if not mail_found : raise Exception('No matching email found')
+        if not found : raise Exception('Event id ' + event_id + ' not found')
 
 @keyword('Update Scenario Data From Results')
 def update_scenario_data_from_results(scenario, results) :
 
-    scenario['data']['google']['items'] = results['microsoft'].scenario()['items']
-
+    scenario['data']['events'] = results['microsoft'].scenario()['events']
+    logger.debug(scenario)
 
     return scenario
 
 @keyword('Merge Scenario Data')
 def merge_scenario_data(scenario, scenario2) :
 
-    for i_data, data in enumerate(scenario2['data']['google']['items']) :
+    result = deepcopy(scenario)
+
+    for data2 in scenario2['data']['events'] :
         found = False
-        for data2 in scenario['data']['google']['items'] :
-            if data2['id'] == data['id'] :
+        for data in result['data']['events'] :
+            if data['id'] == data2['id'] :
                 found = True
-                scenario['data']['google']['items'][i_data]['start'] = data['start']
-                scenario['data']['google']['items'][i_data]['end'] = data['end']
-                scenario['data']['google']['items'][i_data]['delta_start_hours'] = data['delta_start_hours']
-                scenario['data']['google']['items'][i_data]['delta_end_hours'] = data['delta_end_hours']
+                data['start'] = data2['start']
+                data['end'] = data2['end']
+                data['full_day'] = data2['full_day']
+                data['delta_start_hours'] = data2['delta_start_hours']
+                data['delta_end_hours'] = data2['delta_end_hours']
+                data['attendees'] = data2['attendees']
 
-        if not found : scenario['data']['google']['items'].append(data)
+        if not found : result['data']['events'].append(data2)
 
-    scenario['results'] = scenario2['results']
+    for data2 in scenario2['data']['contacts'] :
+        found = False
+        for data in result['data']['contacts'] :
+            if data['mail'] == data2['mail'] :
+                found = True
+                data = deepcopy(data2)
 
-    return scenario
+        if not found : result['data']['contacts'].append(data2)
+
+    return result

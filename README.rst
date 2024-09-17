@@ -36,16 +36,17 @@ This python scripts performs the following steps :
    - Which are due to happen in the next N days
    - Whose Summary contains a given topic
    - Which have not been registered yet, or whose registration date have changed ( see below )
+   - Whose registration date has not changed, but who have additional attendees
 
 2) Select the name of the attendees from a contact list using Microsoft Graph API:
 
    - Fron the selected event, attendees email addresses are selected
    - The email address are matched against contact list
-   - The contacts are marked as students if their title is Team Member, as adults if their title is Coach and as mentors if their title is mentor. Other title are not considered
+   - The contacts are marked as students if one of their tags is Student, as adults if one of their tags is Adult.
 
 3) Build a registration email from the pattern text file
 
-   - Replacing {{adults}}, {{students}} and {{mentors}} by the attendees names
+   - Replacing {{adults}}, {{students}} by the attendees names
    - Replacing {{start_time}} and {{end_time}} by the event start and end time
    - Replacing {{team}} by the team name
    - Replacing {{date}} by the start time day
