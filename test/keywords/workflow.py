@@ -37,16 +37,17 @@ from comparer                import Comparer
 # Logger configuration settings
 logg_conf_path = path.normpath(path.join(path.dirname(__file__), '../../conf/logging.conf'))
 
+
 now = datetime.now(timezone.utc)
 
 @keyword('Load Scenario Data')
-def load_scenario_data(identifier, conf) :
+def load_scenario_data(identifier, conf, api) :
     """ Load test data and test configuration"""
 
     result = {}
 
     # Load scenario data
-    result = Parser.read_scenario(identifier, conf)
+    result = Parser.read_scenario(identifier, conf, api)
 
     # Format events timestamp info into datetime objects
     for event in result['data']['events'] :
@@ -68,7 +69,6 @@ def load_scenario_data(identifier, conf) :
         event['end']['date'] = end
 
     return result
-
 
 @keyword('Load Results')
 def load_results(identifier, conf) :
@@ -92,14 +92,18 @@ def run_registration_workflow_with_mocks(scenario, receiver, sender) :
 
     config.fileConfig(logg_conf_path)
 
-    registration = Registration(
-        'token.json', mail='smtp_password',
-        getfunc = result['microsoft'].get,
-        postfunc = result['microsoft'].post,
-        smtp_server=result['smtp'],
-        imap_server=result['imap'])
+
+    registration = Registration(scenario['api'], scenario['token'], mail='smtp_password')
+    registration.mock(
+        {
+            'get' : result['microsoft'].get,
+            'post' : result['microsoft'].post,
+            'smtp' : result['smtp'],
+            'imap' : result['imap']
+        })
 
     registration.configure(scenario['conf'], receiver, sender)
+    registration.initialize()
     registration.search_events()
     registration.prepare_emails()
     registration.send_emails()

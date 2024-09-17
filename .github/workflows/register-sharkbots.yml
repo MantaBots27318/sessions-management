@@ -1,0 +1,41 @@
+# -------------------------------------------------------
+# Copyright (c) [2024] FASNY
+# All rights reserved
+# -------------------------------------------------------
+# Automatic kids session management
+# -------------------------------------------------------
+# Nadège LEMPERIERE, @17th september 2024
+# Latest revision: 17th september 2024
+# -------------------------------------------------------
+
+name: Sharkbots Robotics Session Registration
+
+on:
+    schedule:
+        - cron: '0 4 * * *'  # Runs at midnight UTC every day
+    workflow_dispatch:  # Allows manual trigger from GitHub Actions
+    repository_dispatch: # Allows  trigger from GitHub API
+
+jobs:
+
+    register:
+        name: Launching registration process
+        runs-on: ubuntu-latest
+        container:
+          image: docker://python:3.12.6
+          options: --entrypoint /bin/bash
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@master
+
+            - name: Get token
+              env:
+                TOKEN: ${{secrets.SHARKBOTS_TOKEN}}
+              shell: bash
+              run: echo "$TOKEN" >> token.json
+
+            - name: Launch registration
+              env:
+                RECIPIENT: ${{vars.SHARKBOTS_RECIPIENT}}
+              run: ./scripts/register.sh -t ${RECIPIENT} -c conf/conf-sharkbots.json -a Google
+

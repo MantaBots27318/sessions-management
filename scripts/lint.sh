@@ -18,4 +18,4 @@ pip install --quiet --no-warn-script-location -r $scriptpath/../requirements-tes
 pip install --quiet --no-warn-script-location -r $scriptpath/../requirements.txt
 
 # Launch pylint analysis
- pylint --rcfile=.pylintrc $scriptpath/../manager.py
+pylint --rcfile=.pylintrc $scriptpath/../manager.py $scriptpath/../api

@@ -1,0 +1,19 @@
+{
+    "team" : "Sharkbots",
+    "mail" : {
+        "from" : {
+            "address"     : "ftc.sharkbots@gmail.com"
+        },
+        "to" : "nadege.lemperiere@gmail.com",
+        "pattern" : "conf/mail-pattern.txt"
+    },
+    "calendar" : {
+        "name"      : "2024-2025 IntoTheDeep Team Calendar",
+        "topic"     : "Team Session",
+        "days"      : 1,
+        "full_day"  : "True",
+        "time_zone" : "America/New_York"
+    }
+
+}
+

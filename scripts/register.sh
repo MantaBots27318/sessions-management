@@ -15,14 +15,15 @@ scriptpath=`dirname $script`
 
 # Parse arguments from flags
 args=""
-while getopts m:i:s:c:p:t:f:r: flag
+while getopts c:p:t:f:k:a flag
 do
     case "${flag}" in
-          k) args+=" --microsoft ${OPTARG}";;
-          c) args+=" --conf \"${OPTARG}\"";;
+          k) args+=" --token ${OPTARG}";;
+          c) args+=" --conf ${OPTARG}";;
           p) args+=" --mail ${OPTARG}";;
           t) args+=" --receiver ${OPTARG}";;
           f) args+=" --sender ${OPTARG}";;
+          a) args+=" --api ${OPTARG}";;
     esac
 done
 
