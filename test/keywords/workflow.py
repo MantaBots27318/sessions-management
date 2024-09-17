@@ -15,6 +15,7 @@ from json      import load
 from datetime  import datetime, timedelta, timezone
 from zoneinfo  import ZoneInfo
 from logging   import config, getLogger
+from copy      import deepcopy
 relpath.append(path.relpath("../../"))
 
 # Robotframework includes
@@ -108,6 +109,8 @@ def run_registration_workflow_with_mocks(scenario, receiver, sender) :
 @keyword('Check Final State')
 def check_final_state(reference, results) :
 
+    print(reference)
+
     mails = results['smtp'].get_mails()
     events = results['microsoft'].scenario()['events']
 
@@ -162,19 +165,29 @@ def update_scenario_data_from_results(scenario, results) :
 @keyword('Merge Scenario Data')
 def merge_scenario_data(scenario, scenario2) :
 
-    for i_data, data in enumerate(scenario2['data']['events']) :
+    result = deepcopy(scenario)
+
+    for data2 in scenario2['data']['events'] :
         found = False
-        for data2 in scenario['data']['events'] :
-            if data2['id'] == data['id'] :
+        for data in result['data']['events'] :
+            if data['id'] == data2['id'] :
                 found = True
-                scenario['data']['events'][i_data]['start'] = data['start']
-                scenario['data']['events'][i_data]['end'] = data['end']
-                scenario['data']['events'][i_data]['delta_start_hours'] = data['delta_start_hours']
-                scenario['data']['events'][i_data]['delta_end_hours'] = data['delta_end_hours']
-                scenario['data']['events'][i_data]['attendees'] = data['attendees']
+                data['start'] = data2['start']
+                data['end'] = data2['end']
+                data['full_day'] = data2['full_day']
+                data['delta_start_hours'] = data2['delta_start_hours']
+                data['delta_end_hours'] = data2['delta_end_hours']
+                data['attendees'] = data2['attendees']
 
-        if not found : scenario['data']['events'].append(data)
+        if not found : result['data']['events'].append(data2)
 
-    scenario['results'] = scenario2['results']
+    for data2 in scenario2['data']['contacts'] :
+        found = False
+        for data in result['data']['contacts'] :
+            if data['mail'] == data2['mail'] :
+                found = True
+                data = deepcopy(data2)
 
-    return scenario
+        if not found : result['data']['contacts'].append(data2)
+
+    return result

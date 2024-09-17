@@ -32,3 +32,9 @@ Library          ../keywords/workflow.py
     ${reference}     Load Results          Events3    test/data/conf_non_full.json
     ${result}        Run Registration Workflow with Mocks    ${scenario}    moi@moi.com    test@test.org
     Check Final State        ${reference}    ${result}
+
+2.4 Ensure Events Filtering On Status Is Correctly Managed For Full Day Data
+    ${scenario}      Load Scenario Data    13        test/data/conf_non_full.json
+    ${reference}     Load Results          Nothing   test/data/conf_non_full.json
+    ${result}        Run Registration Workflow with Mocks    ${scenario}    moi@moi.com    test@test.org
+    Check Final State        ${reference}    ${result}

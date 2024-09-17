@@ -66,7 +66,8 @@
             { "role" : "Team Member", "mail"  : "Student1@example.com", "name"  : "Student 1", "tags" : ["Student"] },
             { "role" : "Mentor", "mail"  : "Student3@example.com", "name"  : "Student 3", "tags" : ["Student"]},
             { "role" : "Mentor", "mail"  : "coach1@example.com", "name"  : "Coach 1", "tags" : [] },
-            { "role" : "Coach", "mail" : "coach2@example.com", "name" : "Coach 2", "tags" : ["Adult"] }
+            { "role" : "Coach", "mail" : "coach2@example.com", "name" : "Coach 2", "tags" : ["Adult"] },
+            { "role" : "Coach", "mail" : "coach4@example.com", "name" : "Coach 4", "tags" : ["Adult"] }
         ],
         "smtp" : {},
         "imap" : {}
@@ -132,23 +133,14 @@
                 "delta_start_hours" : 719,
                 "delta_end_hours" : 743,
                 "status": "confirmed",
-                "attendees": [
-                    {"mail": "moi@moi.fr"},
-                    {"mail": "coach@example.com"}
-                ]
+                "attendees": [ {"mail": "moi@moi.fr"}, {"mail": "coach@example.com"} ]
             }
         ],
         "contacts": [
-            {
-                "role" : "Team Member",
-                "mail" : "moi@moi.fr",
-                "name" : "Moi", "tags" : ["Student"]
-            }
+            { "role" : "Team Member", "mail" : "moi@moi.fr", "name" : "Moi", "tags" : ["Student"] }
         ],
-        "smtp" : {
-        },
-        "imap" : {
-        }
+        "smtp" : {},
+        "imap" : {}
     },
     "5" : {
         "calendars" : [
@@ -163,9 +155,7 @@
                 "delta_start_hours" : 0,
                 "delta_end_hours" : 24,
                 "status": "confirmed",
-                "attendees": [
-                    {"mail": "moi@moi.fr"},
-                    {"mail": "coach@example.com"}
+                "attendees": [ {"mail": "moi@moi.fr"}, {"mail": "coach@example.com"}
                 ]
             },
             {
@@ -175,10 +165,7 @@
                 "delta_start_hours" : 744,
                 "delta_end_hours" : 768,
                 "status": "confirmed",
-                "attendees": [
-                    {"mail": "moi@moi.fr"},
-                    {"mail": "coach@example.com"}
-                ]
+                "attendees": [ {"mail": "moi@moi.fr"}, {"mail": "coach@example.com"} ]
             },
             {
                 "id": "event3",
@@ -187,10 +174,7 @@
                 "delta_start_hours" : 24,
                 "delta_end_hours" : 48,
                 "status": "confirmed",
-                "attendees": [
-                    {"mail": "moi@moi.fr"},
-                    {"mail": "coach@example.com"}
-                ]
+                "attendees": [ {"mail": "moi@moi.fr"}, {"mail": "coach@example.com"} ]
             },
             {
                 "id": "event4",
@@ -199,10 +183,7 @@
                 "delta_start_hours" : 900,
                 "delta_end_hours" : 910,
                 "status": "confirmed",
-                "attendees": [
-                    {"mail": "moi@moi.fr"},
-                    {"mail": "coach@example.com"}
-                ]
+                "attendees": [ {"mail": "moi@moi.fr"}, {"mail": "coach@example.com"}]
             },
             {
                 "id": "event5",
@@ -211,28 +192,15 @@
                 "delta_start_hours" : 719,
                 "delta_end_hours" : 743,
                 "status": "confirmed",
-                "attendees": [
-                    {"mail": "moi@moi.fr"},
-                    {"mail": "coach@example.com"}
-                ]
+                "attendees": [ {"mail": "moi@moi.fr"}, {"mail": "coach@example.com"} ]
             }
         ],
         "contacts": [
-            {
-                "role" : "Team Member",
-                "mail" : "moi@moi.fr",
-                "name" : "Moi", "tags" : ["Student"]
-            },
-            {
-                "role" : "Coach",
-                "mail" : "coach2@example.com",
-                "name" : "Coach 2", "tags" : ["Adult"]
-            }
+            { "role" : "Team Member", "mail" : "moi@moi.fr", "name" : "Moi", "tags" : ["Student"] },
+            { "role" : "Coach", "mail" : "coach2@example.com", "name" : "Coach 2", "tags" : ["Adult"] }
         ],
-        "smtp" : {
-        },
-        "imap" : {
-        }
+        "smtp" : {},
+        "imap" : {}
     },
     "6" : {
         "calendars" : [
@@ -247,10 +215,7 @@
                 "delta_start_hours" : 0,
                 "delta_end_hours" : 24,
                 "status": "confirmed",
-                "attendees": [
-                    {"mail": "moi@moi.fr"},
-                    {"mail": "coach2@example.com"}
-                ]
+                "attendees": [ {"mail": "moi@moi.fr"}, {"mail": "coach2@example.com"}]
             },
             {
                 "id": "event2",
@@ -259,10 +224,7 @@
                 "delta_start_hours" : 744,
                 "delta_end_hours" : 768,
                 "status": "confirmed",
-                "attendees": [
-                    {"mail": "moi@moi.fr"},
-                    {"mail": "coach@example.com"}
-                ]
+                "attendees": [ {"mail": "moi@moi.fr"}, {"mail": "coach@example.com"}]
             },
             {
                 "id": "event3",
@@ -271,10 +233,7 @@
                 "delta_start_hours" : 24,
                 "delta_end_hours" : 72,
                 "status": "confirmed",
-                "attendees": [
-                    {"mail": "moi@moi.fr"},
-                    {"mail": "coach@example.com"}
-                ]
+                "attendees": [{"mail": "moi@moi.fr"}, {"mail": "coach@example.com"}]
             },
             {
                 "id": "event4",
@@ -283,10 +242,7 @@
                 "delta_start_hours" : 900,
                 "delta_end_hours" : 910,
                 "status": "confirmed",
-                "attendees": [
-                    {"mail": "moi@moi.fr"},
-                    {"mail": "coach@example.com"}
-                ]
+                "attendees": [{"mail": "moi@moi.fr"}, {"mail": "coach@example.com"}]
             },
             {
                 "id": "event5",
@@ -295,10 +251,7 @@
                 "delta_start_hours" : 719,
                 "delta_end_hours" : 743,
                 "status": "confirmed",
-                "attendees": [
-                    {"mail": "moi@moi.fr"},
-                    {"mail": "coach@example.com"}
-                ]
+                "attendees": [ {"mail": "moi@moi.fr"}, {"mail": "coach@example.com"} ]
             },
             {
                 "id": "event6",
@@ -307,10 +260,7 @@
                 "delta_start_hours" : 519,
                 "delta_end_hours" : 543,
                 "status": "confirmed",
-                "attendees": [
-                    {"mail": "moi@moi.fr"},
-                    {"mail": "coach@example.com"}
-                ]
+                "attendees": [{"mail": "moi@moi.fr"}, {"mail": "coach@example.com"} ]
             },
             {
                 "id": "event7",
@@ -319,20 +269,15 @@
                 "delta_start_hours" : 1000,
                 "delta_end_hours" : 1010,
                 "status": "confirmed",
-                "attendees": [
-                    {"mail": "moi@moi.fr"},
-                    {"mail": "coach@example.com"}
-                ]
+                "attendees": [ {"mail": "moi@moi.fr"}, {"mail": "coach@example.com"}]
             }
         ],
         "contacts": [
             { "role" : "Team Member", "mail" : "moi@moi.fr", "name" : "Moi", "tags" : ["Student"] },
             { "role" : "Coach", "mail" : "coach2@example.com", "names" : "Coach 2", "tags" : ["Adult"] }
         ],
-        "smtp" : {
-        },
-        "imap" : {
-        }
+        "smtp" : {},
+        "imap" : {}
     },
     "7" : {
         "calendars" : [
@@ -356,6 +301,161 @@
                 "delta_start_hours" : 0,
                 "delta_end_hours" : 24,
                 "status": "confirmed",
+                "attendees": [ {"mail": "moi@moi.fr"}, {"mail": "coach@example.com"} ]
+            }
+        ],
+        "contacts": [ { "role" : "Team Member", "mail" : "moi@moi.fr", "name" : "Moi", "tags" : ["Student"] }
+        ],
+        "smtp" : {},
+        "imap" : {}
+    },
+    "8" : {
+        "calendars" : [
+            { "id": "calendar1", "name": "2024-2025 IntoTheDeep Team Calendar" },
+            { "id": "calendar2", "name": "Test Calendar" }
+        ],
+        "events" : [
+            {
+                "id": "event1",
+                "summary": "Next Team Session Saturday",
+                "full_day" : "false",
+                "delta_start_hours" : 0,
+                "delta_end_hours" : 48,
+                "status": "confirmed",
+                "attendees": [ {"mail": "moi@moi.fr"}, {"mail": "coach@example.com"} ]
+            }
+        ],
+        "contacts": [ { "role" : "Team Member", "mail" : "moi@moi.fr", "name" : "Moi", "tags" : ["Student"] } ],
+        "smtp" : {},
+        "imap" : {}
+    },
+    "9" : {
+        "calendars" : [
+            { "id": "calendar1", "name": "2024-2025 IntoTheDeep Team Calendar" },
+            { "id": "calendar2", "name": "Test Calendar" }
+        ],
+        "events" : [
+            {
+                "id": "event1",
+                "summary": "Next Team Session Saturday",
+                "full_day" : "false",
+                "delta_start_hours" : 0,
+                "delta_end_hours" : 48,
+                "status": "confirmed",
+                "attendees": []
+            }
+        ],
+        "contacts": [ { "role" : "Team Member", "mail" : "moi@moi.fr", "name" : "Moi", "tags" : ["Student"] } ],
+        "smtp" : {},
+        "imap" : {}
+    },
+    "10" : {
+        "calendars" : [
+            { "id": "calendar1", "name": "2024-2025 IntoTheDeep Team Calendar" },
+            { "id": "calendar2", "name": "Test Calendar" }
+        ],
+        "events" : [
+            {
+                "id": "event1",
+                "summary": "Next Team Session Saturday",
+                "full_day" : "false",
+                "delta_start_hours" : 0,
+                "delta_end_hours" : 24,
+                "status": "confirmed",
+                "attendees": [
+                    {"mail": "Student1@example.com"},
+                    {"mail": "Student2@example.com"},
+                    {"mail": "Student3@example.com"},
+                    {"mail": "coach1@example.com"},
+                    {"mail": "coach2@example.com"},
+                    {"mail": "coach3@example.com"},
+                    {"mail": "coach4@example.com"}
+                ]
+            }
+        ],
+        "contacts": [
+            { "role" : "Team Member", "mail"  : "Student1@example.com", "name"  : "Student 1", "tags" : ["Student"] },
+            { "role" : "Mentor", "mail"  : "Student3@example.com", "name"  : "Student 3", "tags" : ["Student"]},
+            { "role" : "Mentor", "mail"  : "coach1@example.com", "name"  : "Coach 1", "tags" : [] },
+            { "role" : "Coach", "mail" : "coach2@example.com", "name" : "Coach 2", "tags" : ["Adult"] },
+            { "role" : "Coach", "mail" : "coach3@example.com", "name" : "Coach 3", "tags" : ["Adult"] },
+            { "role" : "Coach", "mail" : "coach4@example.com", "name" : "Coach 4", "tags" : ["Adult"] }
+        ],
+        "smtp" : {},
+        "imap" : {}
+    },
+    "11" : {
+        "calendars" : [
+            { "id": "calendar1", "name": "2024-2025 IntoTheDeep Team Calendar" },
+            { "id": "calendar2", "name": "Test Calendar" }
+        ],
+        "events" : [
+            {
+                "id": "event1",
+                "summary": "Next Team Session Saturday",
+                "full_day" : "false",
+                "delta_start_hours" : 0,
+                "delta_end_hours" : 18,
+                "status": "confirmed",
+                "attendees": [ {"mail": "moi@moi.fr"}, {"mail": "coach@example.com"} ]
+            }
+        ],
+        "contacts": [ { "role" : "Team Member", "mail" : "moi@moi.fr", "name" : "Moi", "tags" : ["Student"] } ],
+        "smtp" : {},
+        "imap" : {}
+    },
+    "12" : {
+        "calendars" : [
+            { "id": "calendar1", "name": "2024-2025 IntoTheDeep Team Calendar" },
+            { "id": "calendar2", "name": "Test Calendar" }
+        ],
+        "events" : [
+            {
+                "id": "event1",
+                "summary": "Next Team Session Saturday",
+                "full_day" : "false",
+                "delta_start_hours" : 0,
+                "delta_end_hours" : 24,
+                "status": "confirmed",
+                "attendees": [
+                    {"mail": "Student1@example.com"},
+                    {"mail": "coach1@example.com"}
+                ]
+            }
+        ],
+        "contacts": [
+            { "role" : "Team Member", "mail"  : "Student1@example.com", "name"  : "Student 1", "tags" : ["Student"] },
+            { "role" : "Mentor", "mail"  : "Student3@example.com", "name"  : "Student 3", "tags" : ["Student"]},
+            { "role" : "Mentor", "mail"  : "coach1@example.com", "name"  : "Coach 1", "tags" : [] },
+            { "role" : "Coach", "mail" : "coach2@example.com", "name" : "Coach 2", "tags" : ["Adult"] },
+            { "role" : "Coach", "mail" : "coach3@example.com", "name" : "Coach 3", "tags" : ["Adult"] },
+            { "role" : "Coach", "mail" : "coach4@example.com", "name" : "Coach 4", "tags" : ["Adult"] }
+        ],
+        "smtp" : {},
+        "imap" : {}
+    },
+    "13" : {
+        "calendars" : [
+            { "id": "calendar1", "name": "2024-2025 IntoTheDeep Team Calendar" },
+            { "id": "calendar2", "name": "Test Calendar" }
+        ],
+        "events" : [
+            {
+                "id": "event1",
+                "summary": "Next Team Session Saturday",
+                "full_day" : "false",
+                "delta_start_hours" : 0,
+                "delta_end_hours" : 24,
+                "status": "cancelled",
+                "attendees": [ {"mail": "moi@moi.fr"}, {"mail": "coach@example.com"} ]
+            },
+            {
+                "id": "event2",
+                "summary": "Whoops",
+                "full_day" : "false",
+                "delta_start_hours" : 0,
+                "delta_end_hours" : 24,
+                "status": "cancelled",
                 "attendees": [ {"mail": "moi@moi.fr"}, {"mail": "coach@example.com"} ]
             }
         ],
