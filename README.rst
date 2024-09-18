@@ -64,7 +64,7 @@ Prerequisites
 Depending on your use case, check either :
 
 - The `Microsoft Prerequisites`_
-- The `Google Prerequisites`_here
+- The `Google Prerequisites`_
 
 .. _`Microsoft Prerequisites`: doc/microsoft-configuration.rst
 .. _`Google Prerequisites`: doc/google-configuration.rst
