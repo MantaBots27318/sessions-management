@@ -106,3 +106,36 @@ Creating the trigger
 
 Connecting to the Github CI/CD script
 -------------------------------------
+
+1. Create a github token and store it into the App Scripts project Script Properties (that's not a vault, but it's the best we can avoid exposing it)
+2. Update the onEventChange function to call the github action with the following code
+
+.. code-block:: javascript
+
+    function onEventChange(e) {
+
+    const token = PropertiesService.getScriptProperties().getProperty('GH_ACCESS_TOKEN'); // Replace with your GitHub token
+    const url = `https://api.github.com/repos/MantaBots27318/sessions-management/dispatches`;
+
+    const payload = {
+        event_type: 'sharkbots-event-updated-or-added'
+    };
+
+    const options = {
+        method: 'post',
+        headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: 'application/vnd.github.v3+json'
+        },
+        contentType: 'application/json',
+        payload: JSON.stringify(payload),
+        muteHttpExceptions: true
+    };
+
+    try {
+        const response = UrlFetchApp.fetch(url, options);
+        Logger.log(response.getContentText());
+    } catch (error) {
+        Logger.log(`Error triggering repository_dispatch: ${error}`);
+    }
+    }
