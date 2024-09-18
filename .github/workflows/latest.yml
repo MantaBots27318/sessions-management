@@ -51,9 +51,9 @@ jobs:
 
             - name: Get token
               env:
-                MICROSOFT_TOKEN: ${{secrets.MICROSOFT_TOKEN}}
+                TOKEN: ${{secrets.MANTABOTS_TOKEN}}
               shell: bash
-              run: echo "$MICROSOFT_TOKEN" >> token.json
+              run: echo "$TOKEN" >> token.json
 
             - name: Launching tests
               continue-on-error: true

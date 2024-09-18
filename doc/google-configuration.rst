@@ -114,28 +114,28 @@ Connecting to the Github CI/CD script
 
     function onEventChange(e) {
 
-    const token = PropertiesService.getScriptProperties().getProperty('GH_ACCESS_TOKEN'); // Replace with your GitHub token
-    const url = `https://api.github.com/repos/MantaBots27318/sessions-management/dispatches`;
+        const token = PropertiesService.getScriptProperties().getProperty('GH_ACCESS_TOKEN'); // Replace with your GitHub token
+        const url = `https://api.github.com/repos/MantaBots27318/sessions-management/dispatches`;
 
-    const payload = {
-        event_type: 'sharkbots-event-updated-or-added'
-    };
+        const payload = {
+            event_type: 'sharkbots-event-updated-or-added'
+        };
 
-    const options = {
-        method: 'post',
-        headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/vnd.github.v3+json'
-        },
-        contentType: 'application/json',
-        payload: JSON.stringify(payload),
-        muteHttpExceptions: true
-    };
+        const options = {
+            method: 'post',
+            headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: 'application/vnd.github.v3+json'
+            },
+            contentType: 'application/json',
+            payload: JSON.stringify(payload),
+            muteHttpExceptions: true
+        };
 
-    try {
-        const response = UrlFetchApp.fetch(url, options);
-        Logger.log(response.getContentText());
-    } catch (error) {
-        Logger.log(`Error triggering repository_dispatch: ${error}`);
-    }
+        try {
+            const response = UrlFetchApp.fetch(url, options);
+            Logger.log(response.getContentText());
+        } catch (error) {
+            Logger.log(`Error triggering repository_dispatch: ${error}`);
+        }
     }
