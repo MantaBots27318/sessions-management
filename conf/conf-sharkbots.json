@@ -8,10 +8,10 @@
         "pattern" : "conf/mail-pattern.txt"
     },
     "calendar" : {
-        "name"      : "2024-2025 IntoTheDeep Team Calendar",
+        "name"      : "ftc.sharkbots@gmail.com",
         "topic"     : "Team Session",
         "days"      : 1,
-        "full_day"  : "True",
+        "full_day"  : "False",
         "time_zone" : "America/New_York"
     }
 

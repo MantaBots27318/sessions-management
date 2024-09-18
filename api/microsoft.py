@@ -21,7 +21,6 @@ from requests import get, post
 # Local includes
 from api.api  import API
 
-
 #pylint: disable=W0719, R0902
 class MicrosoftAPI(API):
     """ Microsoft Graph API class """
@@ -232,7 +231,6 @@ class MicrosoftAPI(API):
         response = self.__get(endpoint, headers=headers, params={})
 
         # Get the custom properties
-        print(response.content)
         if response.status_code == 200: result = loads(response.content.decode('utf-8'))
 
         self.__logger.info("---> Got custom properties")

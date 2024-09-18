@@ -15,7 +15,7 @@ scriptpath=`dirname $script`
 
 # Parse arguments from flags
 args=""
-while getopts c:p:t:f:k:a flag
+while getopts c:p:t:f:k:a: flag
 do
     case "${flag}" in
           k) args+=" --token ${OPTARG}";;

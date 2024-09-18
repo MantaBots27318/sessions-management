@@ -62,7 +62,6 @@ class MicrosoftMockAPI:
                 response.set_content(
                     self.__format_extensions(id, extension))
                 response.status_code  = 200
-                print(response.content)
             except Exception as e :
                 response.status_code  = 404
                 response.set_content({'error' : str(e)})
@@ -75,7 +74,6 @@ class MicrosoftMockAPI:
         if endpoint.startswith('https://graph.microsoft.com/v1.0/me/events/') and \
              endpoint.find('/extensions') > 0 :
             try :
-                print(json)
                 self.__update_extensions(endpoint.split('/')[-2], json)
                 response.status_code  = 201
             except Exception as e :
@@ -161,14 +159,10 @@ class MicrosoftMockAPI:
         result = {}
         found = False
 
-        print(identifier)
-        print(extension)
-
         if extension == 'org.mantabots' :
             for event in self.__scenario['events'] :
                 if event['id'] == identifier :
                     found = True
-                    print(event)
                     if 'registration' in event :
                         result = event['registration']
 

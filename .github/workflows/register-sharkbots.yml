@@ -37,5 +37,5 @@ jobs:
             - name: Launch registration
               env:
                 RECIPIENT: ${{vars.SHARKBOTS_RECIPIENT}}
-              run: ./scripts/register.sh -t ${RECIPIENT} -c conf/conf-sharkbots.json -a Google
+              run: ./scripts/register.sh -t ${RECIPIENT} -c conf/conf-sharkbots.json -a Google -f ftc.sharkbots@gmail.com
 

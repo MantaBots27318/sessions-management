@@ -61,32 +61,12 @@ Getting Started
 Prerequisites
 -------------
 
-- An Azure subscription shall have been created for the personal account owning the contact list
+Depending on your use case, check either :
+- The `Microsoft Prerequisites`_
+- The `Google Prerequisites`_here
 
-
-- An app shall have been declared in Microsoft Entra ID, with the following authentication settings :
-   * Redirect URI shall be set to https://mantabots.org
-   * Implicit grant shall be set to Access tokens and ID tokens
-   * Access tokens shall be set to Read and write calendars in all mailboxes, Read user contacts, Send mail as a user, Read user profile
-
-
-.. image:: doc/azure-app-authentication.png
-
-
-- The app shall be granted the following API permissions :
-   * offline_access enables to maintain the acquired authorization the app has for the Microsoft personal account
-   * User.Read enables to get personal account information
-   * Calendars.ReadWrite enables to get calendar events and update them with registration date
-   * Contacts.Read enables to get contact list
-   * Mail.Send enables to send email
-
-
-.. image:: doc/azure-app-api-permissions.png
-
-
-- A secret shall have been created for this user :
-
-.. image:: doc/azure-app-secret.png
+.. _`Microsoft Prerequisites`: doc/microsoft-configuration.rst
+.. _`Google Prerequisites`: doc/google-configuration.rst
 
 Configuration
 -------------
@@ -134,60 +114,23 @@ Secrets
 SMTP and IMAP server
 ********************
 
-   If not using gmail, you'll need the password of the smtp server your sending address uses to connect
+If not using gmail, you'll need the password of the smtp server your sending address uses to connect
 
-Microsoft token
-****************
+API token
+*********
 
-The Microsoft Graph API token enabling access to Microsoft Users (r), Microsoft Calendar API (rw), Microsoft Contact API (ro) and Microsoft Mail API as a token.json file
+Access to cloud API require authentication. Each time a user authenticate, it receives a token which is valid for a short period of time and
+which gives access to a scope of API resources.
+When using a CI/CD script, the user can't use the browser to authenticate. It shall be given a long term token, names "refresh token" which
+is another way to authenticate without using the browser and create a new token.
+The refresh token enabling access to the cloud API shall be provided in a json file
 
-Format
-######
+Depending on your use case, check either :
+- The `Microsoft Token Generation`_
+- The `Google Token Generation`_here
 
-.. code-block:: JSON
-
-   {
-      "token": <authorized oauth user short term token - will be refreshed if no longer valid>,
-      "refresh_token": <authorized oauth user long term refresh token>,
-      "token_uri": "https://login.microsoftonline.com/common",
-      "client_id": <MY_CLIENT_ID>,
-      "client_secret": <MY_CLIENT_SECRET>,
-      "tenant_id": "9188040d-6c67-4c5b-b112-36a304b66dad",
-      "scopes": ["Contacts.Read", "Calendars.ReadWrite", "Mail.Send", "User.Read"]
-   }
-
-N.B : The tenant_id is the default value for personal accounts, not the one from the organizational account in which the app has been created
-
-Content
-#######
-
-The token and refresh token value can be gathered the following way :
-
-- In a web browser, enter address :
-.. code-block:: bash
-
-   https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=<MY CLIENT ID>&response_type=code&redirect_uri=https://mantabots.org&response_mode=query&scope=offline_access%20Contacts.Read%20Calendars.ReadWrite%20Mail.Send%20User.Read
-
-- Select the user owning the calendar and the contact list for authentication
-- You'll be redirected to
-
-.. code-block:: bash
-   https://mantabots.org/?code=<AUTHORIZATION CODE>
-
-- In the command line, use curl :
-
-.. code-block:: bash
-
-   curl -X POST https://login.microsoftonline.com/common/oauth2/v2.0/token \
-     -H "Content-Type: application/x-www-form-urlencoded" \
-     -d "client_id=<MY_CLIENT_ID>" \
-     -d "scope=offline_access Contacts.Read Calendars.ReadWrite Mail.Send User.Read" \
-     -d "code=<AUTHORIZATION CODE>" \
-     -d "redirect_uri=https://mantabots.org" \
-     -d "grant_type=authorization_code" \
-     -d "client_secret=<MY_CLIENT_SECRET>"
-
-The result will contain a short term token and a long term token to update the token.json file
+.. _`Microsoft Token Generation`: doc/microsoft-configuration.rst
+.. _`Google Token Generation`: doc/google-configuration.rst
 
 Usage
 -----
@@ -196,13 +139,13 @@ In an environmentin which python, pip and bash has been installed :
 
 .. code-block:: bash
 
-   ./scripts/register.sh -k <My_TOKEN_FILE> -c <MY_CONF_FILE> -p <MY_SMTP__AND_IMAP_PASSWORD_IF_NEEDED> -t <RECIPIENT_ADDRESS> -f <SENDER_ADDRESS>
+   ./scripts/register.sh -a <Microsoft/Google> -k <My_TOKEN_FILE> -c <MY_CONF_FILE> -p <MY_SMTP__AND_IMAP_PASSWORD_IF_NEEDED> -t <RECIPIENT_ADDRESS> -f <SENDER_ADDRESS>
 
 In an environemnt in which docker is available :
 
 .. code-block:: bash
 
-   ./scripts/launch.sh -k <My_TOKEN_FILE> -c <MY_CONF_FILE> -p <MY_SMTP__AND_IMAP_PASSWORD_IF_NEEDED> -t <RECIPIENT_ADDRESS> -f <SENDER_ADDRESS>
+   ./scripts/launch.sh -a <Microsoft/Google> -k <My_TOKEN_FILE> -c <MY_CONF_FILE> -p <MY_SMTP__AND_IMAP_PASSWORD_IF_NEEDED> -t <RECIPIENT_ADDRESS> -f <SENDER_ADDRESS>
 
 ..code:bashrc
 

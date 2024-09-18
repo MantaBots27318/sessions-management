@@ -9,24 +9,25 @@
 # -------------------------------------------------------
 
 # System includes
-from logging import config, getLogger
-from datetime import datetime, timedelta, timezone
-from os import path
-from json import load, loads, dumps
-from time import time
-from smtplib import SMTP
-from imaplib import IMAP4_SSL, Time2Internaldate
-from zoneinfo import ZoneInfo
+from logging    import config, getLogger
+from datetime   import datetime, timedelta, timezone
+from os         import path
+from json       import load, loads, dumps
+from time       import time
+from smtplib    import SMTP
+from imaplib    import IMAP4_SSL, Time2Internaldate
+from zoneinfo   import ZoneInfo
 
 # Email includes
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
+from email.mime.text        import MIMEText
+from email.mime.multipart   import MIMEMultipart
 
 # Click includes
 from click import option, group
 
 # Local includes
 from api import MicrosoftAPI
+from api import GoogleAPI
 
 # Logger configuration settings
 logg_conf_path = path.normpath(path.join(path.dirname(__file__), 'conf/logging.conf'))
@@ -57,6 +58,7 @@ class Registration:
         # Initialize API
         self.__api = None
         if api.lower() == 'microsoft' : self.__api = MicrosoftAPI()
+        if api.lower() == 'google' : self.__api = GoogleAPI()
 
         # Mock external API if required
         self.__smtp = None
@@ -71,6 +73,7 @@ class Registration:
         self.__user = {}
         self.__contacts = []
         self.__events = []
+        self.__calendar = ''
 
         self.__logger.info('---> Registration initialized')
 #pylint: enable=R0913
@@ -102,13 +105,12 @@ class Registration:
 
         if 'from' not in self.__conf['mail'] :
             # Use gmail address through google api
-            self.__conf['mail']['from'] = { "address" : "mantabots.infra@outlook.com"}
+            self.__conf['mail']['from'] = { "address" : self.__user['mail']}
         if 'address' not in self.__conf['mail']['from'] :
-            self.__conf['mail']['from'] = { "address" : "mantabots.infra@outlook.com"}
+            self.__conf['mail']['from'] = { "address" : self.__user['mail']}
         # Update configuration from command line parameters
         if len(sender) > 0 : self.__conf['mail']['from']['address'] = sender
-        if self.__conf['mail']['from']['address'] != "mantabots.infra@outlook.com" :
-
+        if self.__conf['mail']['from']['address'] != self.__user['mail'] :
 
             # We need the smtp and imap server configuration
             if len(self.__mail_password) == 0 :
@@ -214,13 +216,13 @@ class Registration:
 
         try:
 
-            calendar = self.__get_calendar_id(self.__conf['calendar']['name'])
-            events = self.__api.get_events(calendar, self.__conf['calendar']['days'])
+            self.__calendar = self.__get_calendar_id(self.__conf['calendar']['name'])
+            events = self.__api.get_events(self.__calendar, self.__conf['calendar']['days'])
 
             for event in events :
 
                 # Retrieve the dates for which event has already been registered
-                last_reg = self.__get_registration_status(event['id'])
+                last_reg = self.__get_registration_status(event['id'], self.__calendar)
                 self.__logger.debug('Previous registration data : %s',str(last_reg))
 
                 # Compute the timeslot for which the event shall be registered
@@ -341,7 +343,7 @@ class Registration:
                 # Use Microsoft Graph API to send email
                 try:
 
-                    self.__logger.info('Sending email using Microsoft Graph')
+                    self.__logger.info('Sending email using Cloud API')
                     self.__api.post_mail(
                         message['subject'], message['content'],
                         self.__conf['mail']['to'])
@@ -371,11 +373,10 @@ class Registration:
                 self.__logger.info("--> Email sent successfully!")
                 self.__update_registration_status(
                     event['raw']['id'],
+                    self.__calendar,
                     event['dates'],
                     event['attendees']['all'])
                 self.__logger.info("--> Event status updated!")
-
-
 
     def __get_calendar_id(self, name):
         """
@@ -443,10 +444,11 @@ class Registration:
 
         return result
 
-    def __get_registration_status(self, identifier) :
+    def __get_registration_status(self, identifier, calendar) :
         """
         Get registration status for the event (see __update_registration_status)
         Parameters     :
+            calendar (str)   : Identifier of the calendar containing the event
             identifier (str) : Identifier of the event to analyze
         Returns (dict) : Registration status
         Throws         : Exception if the update fails
@@ -454,7 +456,7 @@ class Registration:
 
         result = {}
 
-        extension = self.__api.get_custom_properties(identifier, Registration.s_ExtensionName)
+        extension = self.__api.get_custom_properties(identifier, Registration.s_ExtensionName, calendar)
 
         if 'sent' in extension and extension['sent']:
             result['start'] = datetime.strptime(extension['start'],'%Y-%m-%dT%H:%M:%S.%f%z')
@@ -592,10 +594,11 @@ class Registration:
 
 #pylint: enable=R0913
 
-    def __update_registration_status(self, identifier, dates, attendees):
+    def __update_registration_status(self, identifier, calendar, dates, attendees):
         """
         Update event in calendar to mark it as sent, with the associated registration date
         Parameters     :
+            calendar (str)   : Identifier of the calendar containing the event
             identifier (str) : Identifier of the event to update
             dates (dict)     : Start and end date of the registration
             attendees (dict) : Lists of students and adults
@@ -613,7 +616,7 @@ class Registration:
             'adults'   : ';'.join(f"{dumps(s)}" for s in attendees['adults'])
         }
 
-        self.__api.post_custom_properties(identifier, Registration.s_ExtensionName, custom_properties)
+        self.__api.post_custom_properties(identifier, Registration.s_ExtensionName, custom_properties, calendar)
 
 # pylint: disable=W0107
 # Main function using Click for command-line options
@@ -634,8 +637,8 @@ def main():
 def run(conf, token, mail, api, receiver, sender):
     """ Script run function """
     registration = Registration(api, token, mail)
-    registration.configure(conf, receiver, sender)
     registration.initialize()
+    registration.configure(conf, receiver, sender)
     registration.search_events()
     registration.prepare_emails()
     registration.send_emails()
