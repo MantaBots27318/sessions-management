@@ -97,12 +97,8 @@ The result will contain a short term token and a long term token to update the t
 Setting up the Outlook Calendar trigger
 =======================================
 
-Creating the trigger
---------------------
+Login to Power Automate and deploy the following cloud flow :
 
-1. Log onto the Microsoft 365 personal account owning the calendar
 
-.. _`Google Apps Scripts`: https://script.google.com/home?pli=1
+.. image:: powerautomate-workflow.png
 
-Connecting to the Github CI/CD script
--------------------------------------
