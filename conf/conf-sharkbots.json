@@ -1,0 +1,19 @@
+{
+    "team" : "Sharkbots",
+    "mail" : {
+        "from" : {
+            "address"     : "ftc.sharkbots@gmail.com"
+        },
+        "to" : "nadege.lemperiere@gmail.com",
+        "pattern" : "conf/mail-pattern.txt"
+    },
+    "calendar" : {
+        "name"      : "ftc.sharkbots@gmail.com",
+        "topic"     : "Team Session",
+        "days"      : 1,
+        "full_day"  : "False",
+        "time_zone" : "America/New_York"
+    }
+
+}
+

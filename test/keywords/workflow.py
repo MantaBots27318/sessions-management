@@ -29,24 +29,27 @@ from manager                 import Registration
 
 # Local includes
 from microsoft               import MicrosoftMockAPI
-from smtpmock                import MockSMTPServer
-from imapmock                import MockImapServer
+from gcp                     import GoogleMockLibrary
+from smtp                    import MockSMTPServer
+from imap                    import MockImapServer
 from parser                  import Parser
 from comparer                import Comparer
 
 # Logger configuration settings
 logg_conf_path = path.normpath(path.join(path.dirname(__file__), '../../conf/logging.conf'))
 
+
 now = datetime.now(timezone.utc)
+now = now.replace(microsecond=0)
 
 @keyword('Load Scenario Data')
-def load_scenario_data(identifier, conf) :
+def load_scenario_data(identifier, conf, api) :
     """ Load test data and test configuration"""
 
     result = {}
 
     # Load scenario data
-    result = Parser.read_scenario(identifier, conf)
+    result = Parser.read_scenario(identifier, conf, api)
 
     # Format events timestamp info into datetime objects
     for event in result['data']['events'] :
@@ -69,7 +72,6 @@ def load_scenario_data(identifier, conf) :
 
     return result
 
-
 @keyword('Load Results')
 def load_results(identifier, conf) :
     """ Load test results """
@@ -85,20 +87,27 @@ def load_results(identifier, conf) :
 def run_registration_workflow_with_mocks(scenario, receiver, sender) :
 
     result = {
+        'api'       : scenario['api'],
         'microsoft' : MicrosoftMockAPI(scenario['data']),
-        'smtp' : MockSMTPServer(scenario['data']['smtp']),
-        'imap' : MockImapServer(scenario['data']['imap'])
+        'google'    : GoogleMockLibrary(scenario['data']),
+        'smtp'      : MockSMTPServer(scenario['data']['smtp']),
+        'imap'      : MockImapServer(scenario['data']['imap'])
     }
 
     config.fileConfig(logg_conf_path)
 
-    registration = Registration(
-        'token.json', mail='smtp_password',
-        getfunc = result['microsoft'].get,
-        postfunc = result['microsoft'].post,
-        smtp_server=result['smtp'],
-        imap_server=result['imap'])
+    registration = Registration(scenario['api'], scenario['token'], mail='smtp_password')
+    registration.mock(
+        {
+            'get'     : result['microsoft'].get,
+            'post'    : result['microsoft'].post,
+            'build'   : result['google'].build,
+            'authent' : result['google'].authent,
+            'smtp'    : result['smtp'],
+            'imap'    : result['imap']
+        })
 
+    registration.initialize()
     registration.configure(scenario['conf'], receiver, sender)
     registration.search_events()
     registration.prepare_emails()
@@ -111,7 +120,11 @@ def check_final_state(reference, results) :
 
 
     mails = results['smtp'].get_mails()
-    events = results['microsoft'].scenario()['events']
+    events = []
+    if results['api'].lower() == 'microsoft' :
+        events = results['microsoft'].scenario()['events']
+    if results['api'].lower() == 'google' :
+        events = results['google'].scenario()['events']
 
     Comparer.compare_emails_number(reference,results)
 
@@ -156,7 +169,10 @@ def check_final_state(reference, results) :
 @keyword('Update Scenario Data From Results')
 def update_scenario_data_from_results(scenario, results) :
 
-    scenario['data']['events'] = results['microsoft'].scenario()['events']
+    if results['api'].lower() == 'microsoft' :
+        scenario['data']['events'] = results['microsoft'].scenario()['events']
+    elif results['api'].lower() == 'google' :
+        scenario['data']['events'] = results['google'].scenario()['events']
     logger.debug(scenario)
 
     return scenario

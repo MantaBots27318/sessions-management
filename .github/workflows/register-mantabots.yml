@@ -5,16 +5,17 @@
 # Automatic kids session management
 # -------------------------------------------------------
 # Nadège LEMPERIERE, @6th september 2024
-# Latest revision: 6th september 2024
+# Latest revision: 17th september 2024
 # -------------------------------------------------------
 
-name: Robotics Session Registration
+name: MantaBots Robotics Session Registration
 
 on:
     schedule:
         - cron: '0 4 * * *'  # Runs at midnight UTC every day
     workflow_dispatch:  # Allows manual trigger from GitHub Actions
     repository_dispatch: # Allows  trigger from GitHub API
+      types: [mantabots-event-updated-or-added]  # Custom event type, can be any string
 
 jobs:
 
@@ -30,14 +31,14 @@ jobs:
 
             - name: Get token
               env:
-                MICROSOFT_TOKEN: ${{secrets.MICROSOFT_TOKEN}}
+                TOKEN: ${{secrets.MANTABOTS_TOKEN}}
               shell: bash
-              run: echo "$MICROSOFT_TOKEN" >> token.json
+              run: echo "$TOKEN" >> token.json
 
             - name: Launch registration
               env:
-                PASSWORD: ${{secrets.MAIL_PASSWORD}}
-                RECIPIENT: ${{vars.RECIPIENT}}
-                SENDER: ${{vars.SENDER}}
-              run: ./scripts/register.sh -p ${PASSWORD} -t ${RECIPIENT} -f ${SENDER}
+                PASSWORD: ${{secrets.MANTABOTS_MAIL_PASSWORD}}
+                RECIPIENT: ${{vars.MANTABOTS_RECIPIENT}}
+                SENDER: ${{vars.MANTABOTS_SENDER}}
+              run: ./scripts/register.sh -p ${PASSWORD} -t ${RECIPIENT} -f ${SENDER} -c conf/conf-mantabots.json -a Microsoft
 

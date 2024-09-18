@@ -23,7 +23,20 @@ class Parser :
     # Input data
     s_DataFilename = path.normpath(path.join(path.dirname(__file__), '../data/data.json'))
 
-    def read_scenario(identifier, conf) :
+    def get_token_file(api) :
+        """ Choose token file depending on API"""
+
+        result = ''
+
+        if api.lower() == 'microsoft' :
+            result = path.normpath(path.join(path.dirname(__file__), '../data/microsoft.json'))
+        elif api.lower() == 'google' :
+            result = path.normpath(path.join(path.dirname(__file__), '../data/google.json'))
+        else : raise Exception('Unknown API')
+
+        return result
+
+    def read_scenario(identifier, conf, api) :
         """ Read the scenario data """
 
         result = {}
@@ -35,9 +48,12 @@ class Parser :
 
         result['data'] = data[identifier]
         result['conf'] = conf
+        result['api'] = api
 
         app_conf_path = path.normpath(path.join(path.dirname(__file__), '../../', conf))
         result['timezone'] = Parser.read_timezone(app_conf_path)
+
+        result['token'] = Parser.get_token_file(result['api'])
 
         return result
 

@@ -2,6 +2,8 @@
 oauth-user.json
 service-account.json
 token.json
+microsoft.json
+google.json
 
 # Tests results
 *.html

@@ -27,7 +27,7 @@ class Comparer :
     def compare_emails_number(expected, actual) :
         """ Compare the number of emails sent """
 
-        logger.info(f'Sent {len(expected['data']['mails'])} emails [reference {len(actual['smtp'].get_mails())}]')
+        logger.info(f'Sent {len(actual['smtp'].get_mails())} emails [reference {len(expected['data']['mails'])}]')
 
         if len(expected['data']['mails']) != len(actual['smtp'].get_mails()) :
             raise Exception('Different number of emails sent')
