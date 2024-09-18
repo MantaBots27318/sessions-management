@@ -15,6 +15,7 @@ on:
         - cron: '0 4 * * *'  # Runs at midnight UTC every day
     workflow_dispatch:  # Allows manual trigger from GitHub Actions
     repository_dispatch: # Allows  trigger from GitHub API
+      types: [google-event-updated-or-added]  # Custom event type, can be any string
 
 jobs:
 
