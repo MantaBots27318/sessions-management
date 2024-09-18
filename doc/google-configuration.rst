@@ -29,12 +29,11 @@ Setting up the Google Project To Access Personal Account Data
 3. Create the oauth client ID for the app, with the following parameters :
     * Application type : Web Application
     * Authorized redirect URIs : https://mantabots.org
+    * Retrieve the secret and store it in a safe place
 
 
 .. image:: google-user.png
 
-
-4. Store the client ID and client secret in a safe place
 
 Retrieving API access credentials
 =================================
