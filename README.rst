@@ -62,6 +62,7 @@ Prerequisites
 -------------
 
 Depending on your use case, check either :
+
 - The `Microsoft Prerequisites`_
 - The `Google Prerequisites`_here
 
@@ -126,6 +127,7 @@ is another way to authenticate without using the browser and create a new token.
 The refresh token enabling access to the cloud API shall be provided in a json file
 
 Depending on your use case, check either :
+
 - The `Microsoft Token Generation`_
 - The `Google Token Generation`_here
 
