@@ -143,7 +143,7 @@ class MicrosoftAPI(API):
 
         # Send the request to get contacts
         response = self.__get(endpoint, headers=headers,
-            params={'$top': 25, '$select': 'displayName,emailAddresses,jobTitle,categories'})
+            params={'$top': 100, '$select': 'displayName,emailAddresses,jobTitle,categories'})
         if response.status_code == 200: result = response.json().get('value', [])
         else : raise Exception(f"Failed retrieving contacts with error : {response.content}")
 
