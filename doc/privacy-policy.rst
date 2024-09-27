@@ -48,7 +48,7 @@ User Control and Rights
 Data Retention
 ==============
 
-Retention of OAuth Tokens: refresh tokens are stored securely in the CI/CD environment and are retained only as long as necessary to execute the app’s functions. Tokens will be refreshed periodically as needed by the pipeline and deleted when no longer required.
+- **Retention of OAuth Tokens**: refresh tokens are stored securely in the CI/CD environment and are retained only as long as necessary to execute the app’s functions. Tokens will be refreshed periodically as needed by the pipeline and deleted when no longer required.
 
 Changes to This Policy
 ======================
