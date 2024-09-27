@@ -29,16 +29,18 @@ Built And Packaged With
 Principle
 =========
 
+We have **two robotics team**, one using a Google account and another using a Microsoft account. Both of them have to **report to the office manager when they plan on having a session**. The goal of this project is to automate this email based on the content of their calendar and contacts list. We want this script to be able to use both Google API and Microsoft API.
+
 This python scripts performs the following steps :
 
-1) Analyze a Microsoft calendar to gather events using Microsoft Graph API:
+1) Analyze a calendar to gather events using either Microsoft Graph API or Google API:
 
    - Which are due to happen in the next N days
    - Whose Summary contains a given topic
    - Which have not been registered yet, or whose registration date have changed ( see below )
    - Whose registration date has not changed, but who have additional attendees
 
-2) Select the name of the attendees from a contact list using Microsoft Graph API:
+2) Select the name of the attendees from a contact list using Microsoft Graph API or Google API:
 
    - Fron the selected event, attendees email addresses are selected
    - The email address are matched against contact list
@@ -51,7 +53,7 @@ This python scripts performs the following steps :
    - Replacing {{team}} by the team name
    - Replacing {{date}} by the start time day
 
-4) Sends the email to the recipient using either an external smtp server or the Microsoft Graph API
+4) Sends the email to the recipient using either an external smtp server, the Microsoft Graph API or the Google Gmail API
 
 5) Update calendar events extended properties to mark them as sent, with the associated registration date
 
