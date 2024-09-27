@@ -29,7 +29,7 @@ Built And Packaged With
 Principle
 =========
 
-We have two robotics team, one using a Google account and another using a Microsoft account. Both of them have to report to the office manager when they plan on having a session. The goal of this project is to automate this email based on the content of their calendar and contacts list. We want this script to be able to use both Google API and Microsoft API.
+We have **two robotics team**, one using a Google account and another using a Microsoft account. Both of them have to **report to the office manager when they plan on having a session**. The goal of this project is to automate this email based on the content of their calendar and contacts list. We want this script to be able to use both Google API and Microsoft API.
 
 This python scripts performs the following steps :
 
