@@ -13,19 +13,18 @@ sessions-management is an application designed to automate email sending for rob
 Data Collection and Use
 =======================
 
-- **OAuth2 Authentication**: We use Google’s OAuth2 system to access data from the Google Calendar API, Gmail API, and Google Contacts API. 
-The OAuth2 token is securely stored in GitHub Secrets as part of our `CI/CD pipeline`_
+- **OAuth2 Authentication**: We use Google’s OAuth2 system to access data from the Google Calendar API, Gmail API, and Google Contacts API. The OAuth2 token is securely stored in GitHub Secrets as part of our `CI/CD pipeline`_
 
 .. _`CI/CD pipeline`: https://github.com/MantaBots27318/sessions-management/blob/main/.github/workflows/register-sharkbots.yml
 
 - **Data We Access**:
 
-* **Calendar Events**: The app accesses calendar events to retrieve information about upcoming robotics team sessions for the purpose of sending email
+  * **Calendar Events**: The app accesses calendar events to retrieve information about upcoming robotics team sessions for the purpose of sending email
   notification to our premises owner.
 
-* **Emails**: The app accesses Gmail to automate the sending of email notifications for scheduled sessions.
+  * **Emails**: The app accesses Gmail to automate the sending of email notifications for scheduled sessions.
 
-* **Contacts List**: The app accesses the Google Contacts API to retrieve information on the attendees names and tags.
+  * **Contacts List**: The app accesses the Google Contacts API to retrieve information on the attendees names and tags.
   
 - **Purpose of Data Use**: The data accessed is strictly used for email automation related to robotics team session notifications and event coordination. 
 It is not used for any other purposes, nor is it shared with any third parties.
